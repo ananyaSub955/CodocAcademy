@@ -1,0 +1,25 @@
+@import "bootstrap/scss/functions";
+@import "bootstrap/scss/variables";
+
+$primary: #012168;
+$secondary: #ffd200;
+
+//adding other colors
+$custom-colors: (
+    "ultramarine" : #0B66B3,
+    "darkFuschia":#D11E61,
+  "lightBlue": #E2F0F5,
+  "burgundy": #3D0200,
+  "deepTeal":#094359,
+  "celeste":#98CBCC,
+  "pastelYellow": #EDC874
+);
+
+// Merge it into the default Bootstrap color map
+$theme-colors: map-merge(
+  $theme-colors,
+  $custom-colors
+);
+
+
+@import "bootstrap/scss/bootstrap";
