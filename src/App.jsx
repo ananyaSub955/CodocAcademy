@@ -6,6 +6,7 @@ import Login from './pages/Login'
 import Error from './components/Error.jsx';
 import NotFound from './components/NotFound.jsx';
 import Landing from './pages/Landing.jsx';
+import SignUpPlans from './pages/SignUpPlans.jsx';
 
 const App = () => {
   const router = createBrowserRouter(
@@ -13,6 +14,7 @@ const App = () => {
       <Route path='/' element={<RootLayout />}>
         <Route index element={<Landing />} /> {/* Landing page as default */}
         <Route path = 'login' element={<Login />} />
+        <Route path='signUpPlans' element={<SignUpPlans />}/>        
         {/* <Route path='logentry' element={<LogInEntry />} />
         <Route path='history' element={<StudentHistoryLayout />}>
           <Route path='date' element={<HistoryDate />} />
