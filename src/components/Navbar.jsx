@@ -7,15 +7,15 @@ const Navbar = () => {
   //const navigate = useNavigate();
 
   return (
-    <nav className="navbar navbar-expand-sm bg-light px-4" id= "navbar">
+    <nav className="navbar navbar-expand-sm px-4" id= "navbar">
       <a className="navbar-brand" href="/">
-        <img src={logo} alt="CSN logo" style={{ width: '200px' }} />
+        <img src={logo} alt="Codoc Academy Logo" style={{ width: '200px' }} />
       </a>
       <div className="container-fluid">
 
         <ul className="navbar-nav ms-auto fs-5">
           <li className="nav-item">
-            <NavLink className="nav-link" to="/">Login</NavLink>
+            <NavLink className="nav-link bg-darkFuschia text-white rounded px-4" to="/login">Login</NavLink>
           </li>
           {/* <li className="nav-item">
             <NavLink className="nav-link" to="/logentry">Log an Entry</NavLink>

@@ -1,16 +1,18 @@
 import React from 'react'
+
 import { Route, createBrowserRouter, createRoutesFromElements, RouterProvider } from 'react-router-dom'
 import RootLayout from './layout/RootLayout';
 import Login from './pages/Login'
 import Error from './components/Error.jsx';
 import NotFound from './components/NotFound.jsx';
-
+import Landing from './pages/Landing.jsx';
 
 const App = () => {
   const router = createBrowserRouter(
     createRoutesFromElements(
       <Route path='/' element={<RootLayout />}>
-        <Route index element={<Login />} />
+        <Route index element={<Landing />} /> {/* Landing page as default */}
+        <Route path = 'login' element={<Login />} />
         {/* <Route path='logentry' element={<LogInEntry />} />
         <Route path='history' element={<StudentHistoryLayout />}>
           <Route path='date' element={<HistoryDate />} />
