@@ -1,10 +1,12 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
+  const navigate = useNavigate();
   return (
     <div className="container mt-5 " style={{ maxWidth: '400px' }}>
-      <h1 className = "text-darkFuschia p-3"> <b> Login </b> </h1>
-      <form className = "bg-ultramarine p-3 rounded  text-light">
+      <h1 className="text-darkFuschia p-3 text-center fw-bold"> <b> Login </b> </h1>
+      <form className="bg-ultramarine p-3 rounded  text-light">
         <div className="mb-3 mt-3">
           <label htmlFor="email" className="form-label"> <b>Email:</b></label>
           <input
@@ -39,7 +41,21 @@ const Login = () => {
         <button type="submit" className="btn btn-darkFuschia">
           Submit
         </button>
+
+        <p className='mt-4'>
+          Don't have an account?{' '}
+          <span
+            onClick={() => navigate('/signUpPlans')}
+            style={{ cursor: 'pointer', textDecoration: 'underline' }}
+          >
+            Sign up Here
+          </span>
+        </p>
+
       </form>
+
+      
+
     </div>
   );
 };

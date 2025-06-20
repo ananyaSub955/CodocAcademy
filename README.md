@@ -15,4 +15,4 @@ If you are developing a production application, we recommend using TypeScript wi
 LINKS: 
 - https://mdbootstrap.com/snippets/standard/mdbootstrap/2885113?view=side
 - https://www.youtube.com/watch?v=943D7U74_sQ
-- 
+- https://fonts.google.com/selection/embed
