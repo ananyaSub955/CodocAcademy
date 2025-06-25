@@ -10,7 +10,9 @@ import SignUpPlans from './pages/SignUpPlans.jsx';
 import CreateJoinGroup from './pages/CreateJoinGroup.jsx';
 import IndividualSignUp from './pages/IndividualSignUp.jsx';
 import CreateGroup from './pages/CreateGroup.jsx';
+import JoinGroup from './pages/JoinGroup.jsx';
 import GroupConfirmation from './pages/GroupConfirmation.jsx';
+
 
 const App = () => {
   const router = createBrowserRouter(
@@ -22,6 +24,7 @@ const App = () => {
         <Route path='groupSignUpChoice' element = {<CreateJoinGroup/>}/>
         <Route path='individualSignUp' element = {<IndividualSignUp/>}/>
         <Route path='createGroup' element = {<CreateGroup/>}/>
+        <Route path = 'joinGroup' element = {<JoinGroup/>} />
         <Route path='groupConfirmation' element = {<GroupConfirmation/>}/>
 
         
