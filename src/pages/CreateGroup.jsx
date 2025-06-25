@@ -1,5 +1,6 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
+import BackButton from '../components/BackButton';
 
 
 const CreateGroup = () => {
@@ -7,19 +8,8 @@ const CreateGroup = () => {
     
     return (
         <div>
-            <div className="mb-3">
-                <button
-                    className="bg-darkFuschia text-white px-4 py-2 rounded border border-darkFuschia d-flex align-items-center"
-                    style={{ marginLeft: '20px' }} 
-                    onClick={() => navigate('/groupSignUpChoice')}
-                >
-                    <i className="fas fa-chevron-left me-2"></i>
-                    Back to Group Choosing
-                </button>
-            </div>
-
-
-
+            <BackButton text = "Back to Group Choosing" link = '/groupSignUpChoice'/>
+        
             <div className="container mt-4" style={{ maxWidth: '500px' }}>
                 <h1 className="text-darkFuschia p-3 text-center fw-bold">
                     <b>Group Sign up</b>
