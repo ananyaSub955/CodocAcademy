@@ -39,7 +39,7 @@ const Login = () => {
           </label>
         </div>
         <button type="submit" className="btn btn-darkFuschia">
-          Submit
+          Login
         </button>
 
         <p className='mt-4'>
