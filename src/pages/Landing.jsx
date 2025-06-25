@@ -37,7 +37,7 @@ const Landing = () => {
                         <img
                             src={landingPageImage}
                             alt="Doctor using Codoc system"
-                            className="img-fluid max-w-sm object-contain"
+                            className="img-fluid max-w-sm object-contain landingImage"
                             onError={(e) => {
                                 e.target.onerror = null;
                                 e.target.src = 'https://via.placeholder.com/500x300?text=Image+Not+Found';

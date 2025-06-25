@@ -25,7 +25,7 @@ body {
     font-size: 3em;
 }
 
-img {
+.landingImage {
     width: 100%;
     height: auto;
 }
