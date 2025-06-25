@@ -11,14 +11,15 @@ const Landing = () => {
                 <div className="row d-flex align-items-center">
                     {/* Left Column */}
                     <div className="col-sm-12 col-md-6 mb-4 mb-md-0">
-                        <h1 className="text-large font-weight-bold lh-base">
+                        <h1 className="text-large font-weight-bold lh-base mb-4">
                             Doctor’s Companion in <br /> Coding and  <br />Documentation
                         </h1>
-                        <h3 className="pl-3 lh-base d-flex justify-content-center ">Sign up Now!</h3>
+                        <h3 className="pl-3 lh-base d-flex justify-content-center fs-2  ">Sign up Now!</h3>
                         <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center gap-3 mt-4 pl-4 ">
                             <button
                                 className="bg-darkFuschia text-white px-4 py-2 rounded border border-darkFuschia transition-transform duration-300 hover:scale-105 hover:text-lg fs-3"
                                 onClick={() => navigate('/signUpPlans')}
+                                // style = {{textWrap:'nowrap'}}
                             >
                                 Company/Group Sign up
                             </button>
@@ -26,6 +27,8 @@ const Landing = () => {
                             <button
                                 className="bg-darkFuschia text-white px-4 py-2 rounded border border-darkFuschia transition-transform duration-300 hover:scale-105 hover:text-lg fs-3"
                                 onClick={() => navigate('/signUpPlans')}
+                                // style = {{textWrap:'nowrap'}}
+
                             >
                                 Individual Sign up
                             </button>
