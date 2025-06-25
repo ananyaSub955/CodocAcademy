@@ -1,21 +1,14 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
+import BackButton from '../components/BackButton';
 
 const CreateJoinGroup = () => {
     const navigate = useNavigate();
 
     return (
         <div>
-            <div className="mb-3">
-                <button
-                    className="bg-darkFuschia text-white px-4 py-2 rounded border border-darkFuschia d-flex align-items-center"
-                    style={{ marginLeft: '20px' }} // adjust as needed
-                    onClick={() => navigate('/signUpPlans')}
-                >
-                    <i className="fas fa-chevron-left me-2"></i>
-                    Back to Sign up Options
-                </button>
-            </div>
+            <BackButton text = "Back to Sign Up Options"/>
+            
 
 
             <div className="container mt-4" style={{ maxWidth: '500px' }}>
