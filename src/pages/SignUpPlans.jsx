@@ -12,7 +12,7 @@ const SignUpPlans = () => {
             <div className="row justify-content-center m-3">
                 <div className="col-12 col-md-3 bg-ultramarine mx-md-3 mb-3 mb-md-0 rounded">
                     {/* fs = font size  fw = font weight*/}
-                    <h2 className="bg-lightBlue rounded p-3 text-center my-4 fs-3 fs-md-2 fw-bold">
+                    <h2 className="bg-lightBlue rounded p-3 text-center my-4 fs-3 fs-md-2 fw-bold" style = {{maxHeight: '100px', textWrap:'nowrap'}}>
                         Company Group Plan
                     </h2>
 
