@@ -6,13 +6,16 @@ const CreateJoinGroup = () => {
 
     return (
         <div>
-            <button
-                className='bg-darkFuschia text-white px-4 py-2 mt-2 rounded border border-darkFuschia'
-                onClick={() => navigate('/signUpPlans')}
-            >
-                <i className="fas fa-chevron-left"></i> 
-                Back to Sign up Options
-            </button>
+            <div className="mb-3">
+                <button
+                    className="bg-darkFuschia text-white px-4 py-2 rounded border border-darkFuschia d-flex align-items-center"
+                    style={{ marginLeft: '20px' }} // adjust as needed
+                    onClick={() => navigate('/signUpPlans')}
+                >
+                    <i className="fas fa-chevron-left me-2"></i>
+                    Back to Sign up Options
+                </button>
+            </div>
 
 
             <div className="container mt-4" style={{ maxWidth: '500px' }}>
@@ -38,7 +41,7 @@ const CreateJoinGroup = () => {
                     <div className="d-flex justify-content-center pb-4">
                         <button
                             className="bg-darkFuschia text-white px-4 py-2 mt-2 rounded border border-darkFuschia transition-transform duration-300 hover:scale-105 hover:text-lg fs-3"
-                            onClick={() => navigate('/createGroup')}
+                            onClick={() => navigate('/joinGroup')}
                         >
                             Join a Group <i className="fas fa-chevron-right"></i>
                         </button>

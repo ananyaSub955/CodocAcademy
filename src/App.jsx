@@ -9,6 +9,7 @@ import Landing from './pages/Landing.jsx';
 import SignUpPlans from './pages/SignUpPlans.jsx';
 import CreateJoinGroup from './pages/CreateJoinGroup.jsx';
 import IndividualSignUp from './pages/IndividualSignUp.jsx';
+import CreateGroup from './pages/CreateGroup.jsx';
 
 const App = () => {
   const router = createBrowserRouter(
@@ -19,6 +20,7 @@ const App = () => {
         <Route path='signUpPlans' element={<SignUpPlans />}/>
         <Route path='groupSignUpChoice' element = {<CreateJoinGroup/>}/>
         <Route path='individualSignUp' element = {<IndividualSignUp/>}/>
+        <Route path='createGroup' element = {<CreateGroup/>}/>
         
         {/* <Route path='logentry' element={<LogInEntry />} />
         <Route path='history' element={<StudentHistoryLayout />}>
