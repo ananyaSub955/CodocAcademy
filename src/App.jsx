@@ -13,38 +13,41 @@ import CreateGroup from './pages/CreateGroup.jsx';
 import JoinGroup from './pages/JoinGroup.jsx';
 import GroupConfirmation from './pages/GroupConfirmation.jsx';
 
+import UserLayout from './User/layout/UserLayout.jsx';
+import UserDashboard from './User/UserDashboard.jsx';
+
 
 const App = () => {
   const router = createBrowserRouter(
     createRoutesFromElements(
+<>
+      // Main App Layout
       <Route path='/' element={<RootLayout />}>
-        <Route index element={<Landing />} /> {/* Landing page as default */}
-        <Route path = 'login' element={<Login />} />
-        <Route path='signUpPlans' element={<SignUpPlans />}/>
-        <Route path='groupSignUpChoice' element = {<CreateJoinGroup/>}/>
-        <Route path='individualSignUp' element = {<IndividualSignUp/>}/>
-        <Route path='createGroup' element = {<CreateGroup/>}/>
-        <Route path = 'joinGroup' element = {<JoinGroup/>} />
-        <Route path='groupConfirmation' element = {<GroupConfirmation/>}/>
-
-        
-        {/* <Route path='logentry' element={<LogInEntry />} />
-        <Route path='history' element={<StudentHistoryLayout />}>
-          <Route path='date' element={<HistoryDate />} />
-          <Route path='form' element={<HistoryForm />} />
-        </Route>
-        <Route path='jobs' element={<JobsLayout />} errorElement = {<Error/>}>
-          <Route index element={<Jobs />} loader={jobsLoader} />
-          <Route path=':id' element={<JobDetails />} loader = {JobDetailsLoader} />
-        </Route> */}
-        <Route path='*' element={<NotFound />} />
+          <Route index element={<Landing />} /> {/* Landing page as default */}
+          <Route path='login' element={<Login />} />
+          <Route path='signUpPlans' element={<SignUpPlans />} />
+          <Route path='groupSignUpChoice' element={<CreateJoinGroup />} />
+          <Route path='individualSignUp' element={<IndividualSignUp />} />
+          <Route path='createGroup' element={<CreateGroup />} />
+          <Route path='joinGroup' element={<JoinGroup />} />
+          <Route path='groupConfirmation' element={<GroupConfirmation />} />
+          < Route path = '*' element = {< NotFound />} />
       </Route>
+
+        //User Layout
+        <Route path='user' element={<UserLayout />}>
+          <Route path='dashboard' element={<UserDashboard />} />
+          {/* <Route path='profile' element={<UserProfile />} /> */}
+          < Route path = '*' element = {< NotFound />} />
+        </Route> 
+      </>
+      
     )
   )
 
-  return (
-    <RouterProvider router={router} />
-  )
+return (
+  <RouterProvider router={router} />
+)
 }
 
 export default App
