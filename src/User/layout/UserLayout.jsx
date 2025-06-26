@@ -3,7 +3,10 @@ import UserNavbar from '../components/UserNavbar'
 import { Outlet } from 'react-router-dom'
 import Footer from '../../components/Footer'
 
+
+
 const UserLayout = () => {
+    
   return (
     <div className="min-h-screen flex flex-col">
         <UserNavbar/>
