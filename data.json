@@ -1,0 +1,15 @@
+[
+    {
+        "id": 1,
+        "firstName": "Alice",
+        "lastName": "Johnson",
+        "email": "alice@example.com",
+        "username": "alicej",
+        "password": "password123",
+        "inGroup": "false",
+        "groupLeader": "false", 
+        "individualUser": "true", 
+        "bookmarks": [],
+        "recently viewed": []
+    }
+]
