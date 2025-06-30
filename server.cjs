@@ -13,7 +13,7 @@ const session = require("express-session");
 const MongoStore = require("connect-mongo");
 app.use(express.urlencoded({ extended: true }));
 
-
+const bcrypt = require("bcryptjs");
 
 const uri = process.env.MONGOURL;
 
@@ -36,8 +36,12 @@ async function connectToMongoDB() {
 }
 connectToMongoDB();
 
+// const windowUrl = window.location.hostname === "localhost"
+//   ? "http://localhost:5173"
+//   : "https://itws-4500-s25-team6.eastus.cloudapp.azure.com/node";
+
 app.use(cors({
-  origin: 'http://localhost:5173', // or  deployed frontend URL
+  origin: 'http://localhost:5173', // deployed frontend URL
   credentials: true,              
 }));
 
@@ -53,8 +57,8 @@ app.use(
       autoRemove: 'native',
     }),
     cookie: {
-      sameSite: 'lax', // or 'none' if using HTTPS on different domains
-      secure: false,   // true if using HTTPS
+      sameSite: 'lax', 
+      secure: false,   
       httpOnly: true,
     },
   })
@@ -80,7 +84,9 @@ app.post("/login", async (req, res) => {
             return res.status(400).json({ message: "User not found" });
         }
 
-        if (user.password === password) {
+        const match = await bcrypt.compare(password, user.password);
+
+        if (match) {
             req.session.user = {
                 id: user._id,
                 email: user.email,
@@ -101,6 +107,51 @@ app.post("/login", async (req, res) => {
     } catch (error) {
         console.error("Login error:", error);
         res.status(500).json({ message: "Internal server error" });
+    }
+});
+
+app.post("/individualSignup", async (req, res) => {
+
+    try {
+        const { firstName, lastName, email, password } = req.body;
+
+        // Check if user already exists
+        const existingUser = await userCollection.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ message: "Email already in use" });
+        }
+
+        const lastUser = await userCollection.find().sort({ id: -1 }).limit(1).toArray();
+        const newId = lastUser.length > 0 ? lastUser[0].id + 1 : 1;
+
+        // Hash password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Create new user
+        const newUser = await userCollection.insertOne({
+            id: newId,
+            firstName,
+            lastName,
+            email,
+            password: hashedPassword,
+            inGroup: false, 
+            groupLeader: false,
+            individualUser: true,
+            bookmarks: [],
+            recientlyViewed: []
+        });
+
+        // Store user information in session
+        req.session.user = {
+            id: newId,
+            email: email, 
+            firstName: firstName
+
+        };
+
+        res.status(201).json({ message: "Signup successful!" });
+    } catch (error) {
+        res.status(500).json({ message: "Error signing up", error: error.message });
     }
 });
 
