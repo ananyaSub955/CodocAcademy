@@ -11,6 +11,28 @@ Currently, two official plugins are available:
 
 If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
 
+For displaying the specialties - Logic:
+[
+  { Category: "A", Subcategory: "X", SubTopics: "1" },
+  { Category: "A", Subcategory: "X", SubTopics: "2" },
+  { Category: "A", Subcategory: "Y", SubTopics: "3" },
+  { Category: "B", Subcategory: "Z", SubTopics: "4" },
+]
+Then structuredData becomes:
+
+js
+Copy
+Edit
+{
+  A: {
+    X: [ {SubTopics: "1"}, {SubTopics: "2"} ],
+    Y: [ {SubTopics: "3"} ]
+  },
+  B: {
+    Z: [ {SubTopics: "4"} ]
+  }
+}
+
 
 LINKS: 
 - https://mdbootstrap.com/snippets/standard/mdbootstrap/2885113?view=side

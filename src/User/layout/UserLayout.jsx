@@ -3,8 +3,6 @@ import UserNavbar from '../components/UserNavbar'
 import { Outlet } from 'react-router-dom'
 import Footer from '../../components/Footer'
 
-
-
 const UserLayout = () => {
     
   return (
