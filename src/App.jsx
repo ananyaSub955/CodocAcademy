@@ -15,6 +15,7 @@ import GroupConfirmation from './pages/GroupConfirmation.jsx';
 
 import UserLayout from './User/layout/UserLayout.jsx';
 import UserDashboard from './User/UserDashboard.jsx';
+import SpecialtyInfo from './User/SpecialtyInfo.jsx';
 
 
 const App = () => {
@@ -38,6 +39,7 @@ const App = () => {
         <Route path='user' element={<UserLayout />}>
           <Route path='dashboard' element={<UserDashboard />} />
           {/* <Route path='profile' element={<UserProfile />} /> */}
+          <Route path=":specialty/info" element={<SpecialtyInfo/>} />
           < Route path = '*' element = {< NotFound />} />
         </Route> 
       </>
