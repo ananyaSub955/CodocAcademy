@@ -9,8 +9,6 @@ const CreateJoinGroup = () => {
         <div>
             <BackButton text = "Back to Sign Up Options"/>
             
-
-
             <div className="container mt-4" style={{ maxWidth: '500px' }}>
                 <h1 className="text-darkFuschia p-3 text-center fw-bold">
                     <b>Group Sign up</b>

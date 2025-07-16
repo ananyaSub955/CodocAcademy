@@ -119,6 +119,15 @@ const UserDashboard = () => {
         }
     };
 
+    function toTitleCase(str) {
+        return str
+            .toLowerCase()
+            .split(' ')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
+    }
+
+
     const renderCards = (section, data = []) => {
         return data.map((item, i) => (
             <div
@@ -136,9 +145,9 @@ const UserDashboard = () => {
                     style={{ borderRadius: '10px' }}
                 >
                     <div className="card-body d-flex align-items-center justify-content-center fw-semibold fs-4 w-100">
-                        {item.SubTopics || item.name || `Topic ${i + 1}`}
-
+                        {toTitleCase(item.SubTopics || item.name || `Topic ${i + 1}`)}
                     </div>
+
                 </div>
             </div>
         ));
