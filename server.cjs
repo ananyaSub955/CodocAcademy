@@ -14,6 +14,7 @@ const MongoStore = require("connect-mongo");
 app.use(express.urlencoded({ extended: true }));
 
 const bcrypt = require("bcryptjs");
+const { data } = require('react-router-dom');
 
 const uri = process.env.MONGOURL;
 
@@ -96,6 +97,7 @@ const database = client.db("CodocAcademy");
 app.locals.db = database;
 const userCollection = database.collection("Users");
 const specialitiesCollection = database.collection("Specialties");
+const groupCollection = database.collection("Groups");
 //const diabetes = database.collection("Diabetes");
 
 app.post("/login", async (req, res) => {
@@ -170,10 +172,76 @@ app.post("/individualSignup", async (req, res) => {
         // Store user information in session
         req.session.user = {
             id: newId,
-            email: email,
-            firstName: firstName
-
+            email,
+            firstName,
+            lastName,
+            inGroup: false,
+            groupLeader: false,
+            individualUser: true
         };
+        req.session.userId = newUser.insertedId.toString(); // ✅ this is needed
+
+
+        res.status(201).json({ message: "Signup successful!" });
+    } catch (error) {
+        res.status(500).json({ message: "Error signing up", error: error.message });
+    }
+});
+
+app.post("/joinGroup", async (req, res) => {
+
+    try {
+        const { firstName, lastName, email, password, groupCode } = req.body;
+
+        const group = await groupCollection.findOne({ code: groupCode });
+        if (!group) {
+            return res.status(400).json({ message: "Invalid group code" });
+        }
+
+        // Check if user already exists
+        const existingUser = await userCollection.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ message: "Email already in use" });
+        }
+
+        const lastUser = await userCollection.find().sort({ id: -1 }).limit(1).toArray();
+        const newId = lastUser.length > 0 ? lastUser[0].id + 1 : 1;
+
+        // Hash password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Create new user
+        const newUser = await userCollection.insertOne({
+            id: newId,
+            firstName,
+            lastName,
+            email,
+            password: hashedPassword,
+            inGroup: true,
+            groupLeader: false,
+            individualUser: false,
+            bookmarks: [],
+            recientlyViewed: []
+        });
+
+        await groupCollection.updateOne(
+            { code: groupCode },
+            { $push: { members: newId } }
+        );
+
+        // Store user information in session
+        req.session.user = {
+            id: newId,
+            email,
+            firstName,
+            lastName,
+            inGroup: true,
+            groupLeader: false,
+            individualUser: false,
+            groupCode
+        };
+        req.session.userId = newUser.insertedId.toString(); // ✅ this is needed
+
 
         res.status(201).json({ message: "Signup successful!" });
     } catch (error) {
@@ -263,8 +331,6 @@ app.post("/user/bookmark", async (req, res) => {
         res.status(500).json({ success: false, message: "Server error" });
     }
 });
-
-
 
 app.get('/user/:id/bookmarks', async (req, res) => {
     const { id } = req.params;
@@ -392,7 +458,7 @@ app.get('/user/:id/recommendations', async (req, res) => {
         return true;
     });
 
-    console.log(unique);
+    //console.log(unique);
     res.json(unique.slice(0, 10));
 });
 
