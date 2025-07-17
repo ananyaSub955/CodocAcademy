@@ -17,13 +17,15 @@ import UserLayout from './User/layout/UserLayout.jsx';
 import UserDashboard from './User/UserDashboard.jsx';
 import SpecialtyInfo from './User/SpecialtyInfo.jsx';
 
+import GroupAdminLayout from './GroupAdmin/layout/GroupAdminLayout.jsx'
+import GroupAdminDashboard from './GroupAdmin/GroupAdminDashboard.jsx';
 
 const App = () => {
   const router = createBrowserRouter(
     createRoutesFromElements(
-<>
+      <>
       // Main App Layout
-      <Route path='/' element={<RootLayout />}>
+        <Route path='/' element={<RootLayout />}>
           <Route index element={<Landing />} /> {/* Landing page as default */}
           <Route path='login' element={<Login />} />
           <Route path='signUpPlans' element={<SignUpPlans />} />
@@ -32,24 +34,30 @@ const App = () => {
           <Route path='createGroup' element={<CreateGroup />} />
           <Route path='joinGroup' element={<JoinGroup />} />
           <Route path='groupConfirmation' element={<GroupConfirmation />} />
-          < Route path = '*' element = {< NotFound />} />
-      </Route>
+          < Route path='*' element={< NotFound />} />
+        </Route>
 
         //User Layout
         <Route path='user' element={<UserLayout />}>
           <Route path='dashboard' element={<UserDashboard />} />
           {/* <Route path='profile' element={<UserProfile />} /> */}
-          <Route path=":specialty/info" element={<SpecialtyInfo/>} />
-          < Route path = '*' element = {< NotFound />} />
-        </Route> 
+          <Route path=":specialty/info" element={<SpecialtyInfo />} />
+          < Route path='*' element={< NotFound />} />
+        </Route>
+
+        //Group Admin Layout
+        <Route path='group' element={<GroupAdminLayout />} >
+          <Route path='dashboard' element={<GroupAdminDashboard />} />
+          < Route path='*' element={< NotFound />} />
+        </Route>
       </>
-      
+
     )
   )
 
-return (
-  <RouterProvider router={router} />
-)
+  return (
+    <RouterProvider router={router} />
+  )
 }
 
 export default App

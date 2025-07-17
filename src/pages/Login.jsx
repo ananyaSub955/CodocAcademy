@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const url = window.location.hostname === "localhost"
@@ -20,20 +20,22 @@ const Login = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
-        credentials: 'include', 
+        credentials: 'include',
       });
 
       const data = await response.json();
 
       if (response.ok && data.success) {
-        const { individualUser, inGroup, isGroupAdmin, isSuperAdmin } = data;
+        const { individualUser, inGroup, groupLeader, superAdmin } = data;
 
-        // Only redirect regular users
-        if ((individualUser || inGroup) && !isGroupAdmin && !isSuperAdmin) {
+        if (groupLeader) {
+          navigate('/group/dashboard');
+        } else if (individualUser || inGroup) {
           navigate('/user/dashboard');
+        // } else if (superAdmin) {
+        //   navigate('/admin/dashboard'); // Optional future route
         } else {
-          // Optional: Navigate to different pages for admins in the future
-          console.log('Logged in as admin or group admin');
+          setError("Unauthorized login");
         }
       }
 
