@@ -84,7 +84,8 @@ app.get('/session', async (req, res) => {
         res.json({
             id: user._id.toString(),
             firstName: user.firstName,
-            bookmarks: user.bookmarks || []
+            bookmarks: user.bookmarks || [],
+            code: user.code
         });
     } catch (err) {
         console.error('Session fetch failed:', err);
@@ -125,8 +126,8 @@ app.post("/login", async (req, res) => {
                 success: true,
                 individualUser: user.individualUser || false,
                 inGroup: user.inGroup || false,
-                isGroupAdmin: user.isGroupAdmin || false,
-                isSuperAdmin: user.isSuperAdmin || false
+                groupLeader: user.groupLeader || false,
+                superAdmin: user.superAdmin || false
             });
         } else {
             return res.status(401).json({ message: "Invalid login" });
@@ -165,8 +166,10 @@ app.post("/individualSignup", async (req, res) => {
             inGroup: false,
             groupLeader: false,
             individualUser: true,
+            superAdmin: false,
             bookmarks: [],
-            recientlyViewed: []
+            recientlyViewed: [], 
+            code: null
         });
 
         // Store user information in session
@@ -177,7 +180,8 @@ app.post("/individualSignup", async (req, res) => {
             lastName,
             inGroup: false,
             groupLeader: false,
-            individualUser: true
+            individualUser: true,
+            superAdmin: false,
         };
         req.session.userId = newUser.insertedId.toString(); // ✅ this is needed
 
@@ -191,9 +195,9 @@ app.post("/individualSignup", async (req, res) => {
 app.post("/joinGroup", async (req, res) => {
 
     try {
-        const { firstName, lastName, email, password, groupCode } = req.body;
+        const { firstName, lastName, email, password, code } = req.body;
 
-        const group = await groupCollection.findOne({ code: groupCode });
+        const group = await groupCollection.findOne({ code: code });
         if (!group) {
             return res.status(400).json({ message: "Invalid group code" });
         }
@@ -220,12 +224,13 @@ app.post("/joinGroup", async (req, res) => {
             inGroup: true,
             groupLeader: false,
             individualUser: false,
+            superAdmin: false,
             bookmarks: [],
             recientlyViewed: []
         });
 
         await groupCollection.updateOne(
-            { code: groupCode },
+            { code: code },
             { $push: { members: newId } }
         );
 
@@ -238,7 +243,8 @@ app.post("/joinGroup", async (req, res) => {
             inGroup: true,
             groupLeader: false,
             individualUser: false,
-            groupCode
+            superAdmin: false,
+            code
         };
         req.session.userId = newUser.insertedId.toString(); // ✅ this is needed
 
@@ -247,6 +253,72 @@ app.post("/joinGroup", async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: "Error signing up", error: error.message });
     }
+});
+
+app.post("/createGroup", async (req, res) => {
+
+    try {
+        const { groupName, email, password, code } = req.body;
+
+        const existingGroup = await groupCollection.findOne({ code });
+        if (existingGroup) return res.status(400).json({ message: "Code already in use" });
+
+        const existingUser = await userCollection.findOne({ email });
+        if (existingUser) return res.status(400).json({ message: "Email already used as user" });
+
+        const lastGroup = await groupCollection.find().sort({ id: -1 }).limit(1).toArray();
+        const newId = lastGroup.length > 0 ? lastGroup[0].id + 1 : 1;
+
+        const lastUser = await userCollection.find().sort({ id: -1 }).limit(1).toArray();
+        const newUserId = lastUser.length > 0 ? lastUser[0].id + 1 : 1;
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const newGroup = await groupCollection.insertOne({
+            id: newId,
+            groupName,
+            email,
+            password: hashedPassword,
+            code,
+            members: []
+        });
+
+        await userCollection.insertOne({
+            id: newUserId,
+            email,
+            password: hashedPassword,
+            firstName: groupName,
+            lastName: "Admin",
+            inGroup: true,
+            groupLeader: true,
+            individualUser: false,
+            superAdmin: false,
+            code: code
+        });
+
+        req.session.userId = newGroup.insertedId.toString();
+        res.status(201).json({ message: "Group creation successful!", code });
+
+
+    } catch (error) {
+        res.status(500).json({ message: "Error signing up", error: error.message });
+
+    }
+
+});
+
+app.get("/generateGroupCode", async (req, res) => {
+    const generateCode = async () => {
+        let code, exists;
+        do {
+            code = Math.random().toString(36).substring(2, 8).toUpperCase();
+            exists = await groupCollection.findOne({ code });
+        } while (exists);
+        return code;
+    };
+
+    const code = await generateCode();
+    res.json({ code });
 });
 
 
@@ -462,6 +534,62 @@ app.get('/user/:id/recommendations', async (req, res) => {
     res.json(unique.slice(0, 10));
 });
 
+app.get('/group/:code', async (req, res) => {
+    // console.log("GET /group/:code called");
+    // console.log("Params:", req.params);
+    try {
+        //console.log(req.params.code);
+        const group = await groupCollection.findOne({ code: req.params.code });
+
+        if (!group) return res.status(404).json({ message: "Group not found" });
+
+       // console.log("Raw group members:", group.members);
+
+        // Populate members with user data
+        const memberIds = group.members;  // these are numbers like [7, 12]
+        const members = await userCollection.find({ id: { $in: memberIds } }).toArray();
+        //console.log(members);
+
+
+
+        res.json({ ...group, members });
+    } catch (err) {
+        res.status(500).json({ message: "Error fetching group", error: err.message });
+    }
+});
+
+app.post('/group/:code/removeMember', async (req, res) => {
+    const { memberId } = req.body;
+    const numId = parseInt(memberId, 10);
+
+    try {
+        const group = await groupCollection.findOne({ code: req.params.code });
+        if (!group) return res.status(404).json({ message: "Group not found" });
+
+        //const numericId = parseInt(memberId);
+
+
+        await groupCollection.updateOne(
+            { code: req.params.code },
+            { $pull: { members: numId } }
+        );
+
+        await userCollection.updateOne(
+            { id: numId },
+            {
+                $set: {
+                    inGroup: false,
+                    groupLeader: false,
+                    code: null
+                }
+            }
+        );
+
+        res.json({ message: "Member removed successfully" });
+    } catch (err) {
+        res.status(500).json({ message: "Error removing member", error: err.message });
+    }
+});
 
 //LOGOUT ROUTE
 app.get("/logout", (req, res) => {
