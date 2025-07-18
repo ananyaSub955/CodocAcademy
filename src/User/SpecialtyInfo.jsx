@@ -3,6 +3,7 @@ import { useParams, useLocation } from 'react-router-dom';
 import Accordion from 'react-bootstrap/Accordion';
 import { FaBookmark, FaRegBookmark } from "react-icons/fa";
 import 'bootstrap/dist/css/bootstrap.min.css';
+import BackButton from '../components/BackButton';
 
 const url = window.location.hostname === "localhost"
   ? "http://localhost:5000"
@@ -79,7 +80,7 @@ const SpecialtyInfo = () => {
       .finally(() => setDataLoading(false));
   }, [specialty, userId]);
 
-  
+
   const getFieldValue = (item, target) => {
     const match = Object.keys(item).find(
       key => key.trim().toLowerCase() === target.trim().toLowerCase()
@@ -165,72 +166,79 @@ const SpecialtyInfo = () => {
   }
 
   return (
-    <div className="container">
+
+    <div>
+      <BackButton text="Back to Dashboard" link='/user/dashboard'/>
+
       <h1 className="fs-1 fw-bold text-center text-darkFuschia mb-5">{specialty}</h1>
 
-      <div className="row">
-        {/* Left column: Categories */}
-        <div className="col-md-4 border-end">
-          <h4 className="text-darkFuschia fs-2">Categories</h4>
-          <div className="list-group mb-3">
-            {Object.keys(structuredData).map((cat, i) => (
-              <button
-                key={i}
-                className={`list-group-item list-group-item-action text-black ${cat === selectedCategory ? 'active custom-active' : ''}`}
-                onClick={() => setSelectedCategory(cat)}
-              >
-                {cat}
-              </button>
-            ))}
+      <div className="container">
+
+
+        <div className="row">
+          {/* Left column: Categories */}
+          <div className="col-md-4 border-end">
+            <h4 className="text-darkFuschia fs-2">Categories</h4>
+            <div className="list-group mb-3">
+              {Object.keys(structuredData).map((cat, i) => (
+                <button
+                  key={i}
+                  className={`list-group-item list-group-item-action text-black ${cat === selectedCategory ? 'active custom-active' : ''}`}
+                  onClick={() => setSelectedCategory(cat)}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
 
-        {/* Right column: Subcategories + Subtopics */}
-        <div className="col-md-8">
-          {selectedCategory ? (
-            <>
-              <h4 className="mb-3 fs-2 ">{selectedCategory}</h4>
-              {Object.entries(structuredData[selectedCategory]).map(([subcat, items], subIdx) => (
-                <div key={subIdx} className="mb-4">
-                  <h5 className="text-ultramarine mb-2">{subcat}</h5>
-                  <Accordion alwaysOpen>
-                    {items.map((item, idx) => (
-                      <Accordion.Item eventKey={`${subIdx}-${idx}`} key={idx}>
-                        <Accordion.Header>
-                          <div className="d-flex justify-content-between align-items-center w-100">
-                            <span>{item.SubTopics || "Unnamed SubTopic"}</span>
-                            <div className="d-flex align-items-center mr-4">
-                              <span
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  toggleBookmark(item);
-                                }}
-                                className="cursor-pointer mx-2"
-                              >
-                                {isBookmarked(item) ? <FaBookmark color="#d10b65" /> : <FaRegBookmark />}
-                              </span>
+          {/* Right column: Subcategories + Subtopics */}
+          <div className="col-md-8">
+            {selectedCategory ? (
+              <>
+                <h4 className="mb-3 fs-2 ">{selectedCategory}</h4>
+                {Object.entries(structuredData[selectedCategory]).map(([subcat, items], subIdx) => (
+                  <div key={subIdx} className="mb-4">
+                    <h5 className="text-ultramarine mb-2">{subcat}</h5>
+                    <Accordion alwaysOpen>
+                      {items.map((item, idx) => (
+                        <Accordion.Item eventKey={`${subIdx}-${idx}`} key={idx}>
+                          <Accordion.Header>
+                            <div className="d-flex justify-content-between align-items-center w-100">
+                              <span>{item.SubTopics || "Unnamed SubTopic"}</span>
+                              <div className="d-flex align-items-center mr-4">
+                                <span
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    toggleBookmark(item);
+                                  }}
+                                  className="cursor-pointer mx-2"
+                                >
+                                  {isBookmarked(item) ? <FaBookmark color="#d10b65" /> : <FaRegBookmark />}
+                                </span>
 
+
+                              </div>
 
                             </div>
+                          </Accordion.Header>
 
-                          </div>
-                        </Accordion.Header>
-
-                        <Accordion.Body>
-                          {/* <p><strong>Clinical Tip:</strong> {getFieldValue(item, "Explanation/Clinical tip")}</p>
+                          <Accordion.Body>
+                            {/* <p><strong>Clinical Tip:</strong> {getFieldValue(item, "Explanation/Clinical tip")}</p>
                             <p><strong>ICD-10:</strong> {getFieldValue(item, "Explanation/ICD 10")}</p>
                             <p><strong>Documentation Tip:</strong> {getFieldValue(item, "Explanation/Coding/Documentation tip")}</p> */}
-                          <TopicBody item={item} />
-                        </Accordion.Body>
-                      </Accordion.Item>
-                    ))}
-                  </Accordion>
-                </div>
-              ))}
-            </>
-          ) : (
-            <div className="text-muted mt-4">Select a category to view more information.</div>
-          )}
+                            <TopicBody item={item} />
+                          </Accordion.Body>
+                        </Accordion.Item>
+                      ))}
+                    </Accordion>
+                  </div>
+                ))}
+              </>
+            ) : (
+              <div className="text-muted mt-4">Select a category to view more information.</div>
+            )}
+          </div>
         </div>
       </div>
     </div>
