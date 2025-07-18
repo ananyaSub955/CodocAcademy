@@ -34,7 +34,7 @@ const SignUpPlans = () => {
                             className="bg-darkFuschia text-white px-4 py-2 mt-2 rounded border border-darkFuschia transition-transform duration-300 hover:scale-105 hover:text-lg fs-3"
                             onClick={() => navigate('/groupSignUpChoice')}
                         >
-                            Create/Join Group <i class="fas fa-chevron-right"></i>
+                            Create/Join Group <i className="fas fa-chevron-right"></i>
                         </button>
                     </div>
 
