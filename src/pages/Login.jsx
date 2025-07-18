@@ -32,8 +32,8 @@ const Login = () => {
           navigate('/group/dashboard');
         } else if (individualUser || inGroup) {
           navigate('/user/dashboard');
-        // } else if (superAdmin) {
-        //   navigate('/admin/dashboard'); // Optional future route
+        } else if (superAdmin) {
+          navigate('/superAdmin/dashboard'); 
         } else {
           setError("Unauthorized login");
         }

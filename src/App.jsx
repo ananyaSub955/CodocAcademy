@@ -20,6 +20,10 @@ import SpecialtyInfo from './User/SpecialtyInfo.jsx';
 import GroupAdminLayout from './GroupAdmin/layout/GroupAdminLayout.jsx'
 import GroupAdminDashboard from './GroupAdmin/GroupAdminDashboard.jsx';
 
+import SuperAdminLayout from './SuperAdmin/layout/SuperAdminLayout.jsx';
+import SuperAdminDashboard from './SuperAdmin/SuperAdminDashboard.jsx';
+import GroupMembers from './SuperAdmin/components/GroupMembers.jsx';
+
 const App = () => {
   const router = createBrowserRouter(
     createRoutesFromElements(
@@ -48,6 +52,14 @@ const App = () => {
         //Group Admin Layout
         <Route path='group' element={<GroupAdminLayout />} >
           <Route path='dashboard' element={<GroupAdminDashboard />} />
+          < Route path='*' element={< NotFound />} />
+        </Route>
+
+
+        //Super Admin Layout
+        <Route path='superAdmin' element={<SuperAdminLayout />} >
+          <Route path='dashboard' element={<SuperAdminDashboard />} />
+          <Route path="group/:groupId" element={<GroupMembers />} />
           < Route path='*' element={< NotFound />} />
         </Route>
       </>

@@ -168,7 +168,7 @@ app.post("/individualSignup", async (req, res) => {
             individualUser: true,
             superAdmin: false,
             bookmarks: [],
-            recientlyViewed: [], 
+            recientlyViewed: [],
             code: null
         });
 
@@ -534,6 +534,16 @@ app.get('/user/:id/recommendations', async (req, res) => {
     res.json(unique.slice(0, 10));
 });
 
+app.get('/groups', async (req, res) => {
+    try {
+        const groups = await groupCollection.find({}).toArray();
+        res.json(groups);
+    } catch (error) {
+        console.error("Error fetching groups:", error);
+        res.status(500).json({ message: "Error fetching groups" });
+    }
+});
+
 app.get('/group/:code', async (req, res) => {
     // console.log("GET /group/:code called");
     // console.log("Params:", req.params);
@@ -543,7 +553,7 @@ app.get('/group/:code', async (req, res) => {
 
         if (!group) return res.status(404).json({ message: "Group not found" });
 
-       // console.log("Raw group members:", group.members);
+        // console.log("Raw group members:", group.members);
 
         // Populate members with user data
         const memberIds = group.members;  // these are numbers like [7, 12]
