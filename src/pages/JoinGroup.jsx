@@ -15,7 +15,7 @@ const JoinGroup = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-    const [groupCode, setGroupCode] = useState('')
+    const [code, setCode] = useState('')
     
     const validatePassword = (password) => {
         const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
@@ -25,7 +25,7 @@ const JoinGroup = () => {
 
     const handleSignUp = async (e) => {
         e.preventDefault();
-        if (!firstName || !lastName || !email || !password || !groupCode) {
+        if (!firstName || !lastName || !email || !password || !code) {
             alert("Please fill in all fields.");
             return;
         }
@@ -39,7 +39,7 @@ const JoinGroup = () => {
             const response = await fetch(`${url}/joinGroup`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ firstName, lastName, email, password, groupCode }),
+                body: JSON.stringify({ firstName, lastName, email, password, code }),
                 credentials: "include",
             });
 
@@ -120,15 +120,15 @@ const JoinGroup = () => {
                         />
                     </div>
                     <div className="mb-3 mt-3">
-                        <label htmlFor="groupCode" className="form-label"> <b>Code for the Group you are joining:</b></label>
+                        <label htmlFor="code" className="form-label"> <b>Code for the Group you are joining:</b></label>
                         <input
                             type="text"
                             className="bg-lightBlue form-control"
-                            id="groupCode"
+                            id="code"
                             placeholder="Enter Code:"
-                            name="groupCode"
-                            value={groupCode}
-                            onChange={(e) => setGroupCode(e.target.value)}
+                            name="code"
+                            value={code}
+                            onChange={(e) => setCode(e.target.value)}
                             required
                         />
                     </div>

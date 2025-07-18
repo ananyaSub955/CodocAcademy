@@ -283,7 +283,7 @@ app.post("/createGroup", async (req, res) => {
             members: []
         });
 
-        await userCollection.insertOne({
+        const result = await userCollection.insertOne({
             id: newUserId,
             email,
             password: hashedPassword,
@@ -296,7 +296,20 @@ app.post("/createGroup", async (req, res) => {
             code: code
         });
 
-        req.session.userId = newGroup.insertedId.toString();
+        req.session.user = {
+            id: newUserId,
+            email,
+            groupLeader: true,
+            inGroup: true,
+            individualUser: false,
+            superAdmin: false,
+            code: code,
+        };
+
+        req.session.userId = result.insertedId.toString(); // ✅ this is what /session reads
+
+
+        //req.session.userId = newGroup.insertedId.toString();
         res.status(201).json({ message: "Group creation successful!", code });
 
 
