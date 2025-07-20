@@ -28,7 +28,7 @@ const App = () => {
   const router = createBrowserRouter(
     createRoutesFromElements(
       <>
-      // Main App Layout
+        {/* Main App Layout */}
         <Route path='/' element={<RootLayout />}>
           <Route index element={<Landing />} /> {/* Landing page as default */}
           <Route path='login' element={<Login />} />
@@ -38,29 +38,29 @@ const App = () => {
           <Route path='createGroup' element={<CreateGroup />} />
           <Route path='joinGroup' element={<JoinGroup />} />
           <Route path='groupConfirmation' element={<GroupConfirmation />} />
-          < Route path='*' element={< NotFound />} />
+          < Route path='*' element={<NotFound />} />
         </Route>
 
-        //User Layout
+        {/* User Layout */}
         <Route path='user' element={<UserLayout />}>
           <Route path='dashboard' element={<UserDashboard />} />
           {/* <Route path='profile' element={<UserProfile />} /> */}
           <Route path=":specialty/info" element={<SpecialtyInfo />} />
-          < Route path='*' element={< NotFound />} />
+          < Route path='*' element={<NotFound />} />
         </Route>
 
-        //Group Admin Layout
+        {/* Group Admin Layout */}
         <Route path='group' element={<GroupAdminLayout />} >
           <Route path='dashboard' element={<GroupAdminDashboard />} />
-          < Route path='*' element={< NotFound />} />
+          < Route path='*' element={<NotFound />} />
         </Route>
 
 
-        //Super Admin Layout
+        {/* Super Admin Layout */}
         <Route path='superAdmin' element={<SuperAdminLayout />} >
           <Route path='dashboard' element={<SuperAdminDashboard />} />
           <Route path="group/:groupId" element={<GroupMembers />} />
-          < Route path='*' element={< NotFound />} />
+          < Route path='*' element={<NotFound />} />
         </Route>
       </>
 
