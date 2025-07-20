@@ -133,7 +133,7 @@ const JoinGroup = () => {
                         />
                     </div>
 
-                    {error && <p className="text-warning">{error}</p>}
+                    {error && <p className="text-danger">{error}</p>}
 
 
                     <div className='d-flex justify-content-center py-4'>

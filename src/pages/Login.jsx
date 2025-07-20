@@ -88,7 +88,7 @@ const Login = () => {
           </label>
         </div> */}
 
-        {error && <p className="text-warning">{error}</p>}
+        {error && <p className="text-danger">{error}</p>}
 
         <button type="submit" className="btn btn-darkFuschia">
           Login
