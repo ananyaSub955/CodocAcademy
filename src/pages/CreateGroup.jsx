@@ -143,6 +143,7 @@ const CreateGroup = () => {
                         </p>
                     </div>
 
+                    {error && <p className="text-danger">{error}</p>}
 
                     <div className='d-flex justify-content-center py-4'>
                         <button className="btn btn-darkFuschia text-center fs-4 border border-black" >
