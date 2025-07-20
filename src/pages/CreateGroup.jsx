@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import BackButton from '../components/BackButton';
+import { validatePassword } from '../components/ValidatePassword';
 
 
 const url = window.location.hostname === "localhost"
@@ -16,24 +17,18 @@ const CreateGroup = () => {
     const [password, setPassword] = useState('');
     const [code, setCode] = useState('');
     const [error, setError] = useState('');
-    
-
-    const validatePassword = (password) => {
-        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-        return passwordRegex.test(password);
-    };
 
     const handleGroupCreation = async (e) => {
         e.preventDefault();
-        if (!groupName || !email || !password|| !code) {
+        if (!groupName || !email || !password || !code) {
             alert("Please fill in all fields.");
             return;
         }
 
-         if (!validatePassword(password)) {
-            setError("Password does not meet requirements");
-            return;
-        }
+        // if (!result.valid) {
+        //     setError(result.errors);
+        //     return;
+        // }
 
 
         try {
@@ -77,6 +72,8 @@ const CreateGroup = () => {
         }
     };
 
+
+    const result = validatePassword(password);
 
     return (
         <div>
@@ -127,6 +124,17 @@ const CreateGroup = () => {
                             required
                         />
                     </div>
+                    <div className="mt-2">
+                        <p className="mb-1 text-light"><b>Password must include:</b></p>
+                        <ul className="list-unstyled">
+                            <li style={{ opacity: result.checks.length ? 0.4 : 1 }} className="text-warning">• At least 8 characters</li>
+                            <li style={{ opacity: result.checks.lowercase ? 0.4 : 1 }} className="text-warning">• A lowercase letter</li>
+                            <li style={{ opacity: result.checks.uppercase ? 0.4 : 1 }} className="text-warning">• An uppercase letter</li>
+                            <li style={{ opacity: result.checks.number ? 0.4 : 1 }} className="text-warning">• A number</li>
+                            <li style={{ opacity: result.checks.special ? 0.4 : 1 }} className="text-warning">• A special character (@$!%*?&)</li>
+                        </ul>
+                    </div>
+
                     <div className='d-flex justify-content-center my-4'>
                         <button
                             type="button"
@@ -143,7 +151,12 @@ const CreateGroup = () => {
                         </p>
                     </div>
 
-                    {error && <p className="text-danger">{error}</p>}
+                    {error && (
+                        <ul style={{ color: 'text-warning' }}>
+                            {error.map((msg, idx) => <li key={idx}>{msg}</li>)}
+                        </ul>
+                    )}
+
 
                     <div className='d-flex justify-content-center py-4'>
                         <button className="btn btn-darkFuschia text-center fs-4 border border-black" >

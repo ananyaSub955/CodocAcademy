@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
 import BackButton from '../components/BackButton';
 import { useNavigate } from 'react-router-dom';
+import { validatePassword } from '../components/ValidatePassword';
+
 
 const url = window.location.hostname === "localhost"
     ? "http://localhost:5000"
@@ -16,11 +18,8 @@ const IndividualSignUp = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    //const [result, setResult] = useState('');
 
-    const validatePassword = (password) => {
-        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-        return passwordRegex.test(password);
-    };
 
     const handleSignUp = async (e) => {
         e.preventDefault();
@@ -29,10 +28,10 @@ const IndividualSignUp = () => {
             return;
         }
 
-        if (!validatePassword(password)) {
-            setError("Password does not meet requirements");
-            return;
-        }
+        // if (!result.valid) {
+        //     setError(result.errors);
+        //     return;
+        // }
 
         try {
             const response = await fetch(`${url}/individualSignup`, {
@@ -56,6 +55,9 @@ const IndividualSignUp = () => {
             setError("An error occurred while signing up.");
         }
     };
+
+    const result = validatePassword(password);
+
 
     return (
         <div>
@@ -120,7 +122,17 @@ const IndividualSignUp = () => {
                         />
                     </div>
 
-                    {error && <p className="text-danger">{error}</p>}
+                    <div className="mt-2">
+                        <p className="mb-1 text-light"><b>Password must include:</b></p>
+                        <ul className="list-unstyled">
+                            <li style={{ opacity: result.checks.length ? 0.4 : 1 }} className="text-warning">• At least 8 characters</li>
+                            <li style={{ opacity: result.checks.lowercase ? 0.4 : 1 }} className="text-warning">• A lowercase letter</li>
+                            <li style={{ opacity: result.checks.uppercase ? 0.4 : 1 }} className="text-warning">• An uppercase letter</li>
+                            <li style={{ opacity: result.checks.number ? 0.4 : 1 }} className="text-warning">• A number</li>
+                            <li style={{ opacity: result.checks.special ? 0.4 : 1 }} className="text-warning">• A special character (@$!%*?&)</li>
+                        </ul>
+                    </div>
+
 
                     <div className='d-flex justify-content-center py-4'>
                         <button className="btn btn-darkFuschia text-center fs-4 border border-black" >

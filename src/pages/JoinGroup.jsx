@@ -2,6 +2,8 @@ import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import BackButton from '../components/BackButton';
 import { useState } from 'react'
+import { validatePassword } from '../components/ValidatePassword';
+
 
 const url = window.location.hostname === "localhost"
     ? "http://localhost:5000"
@@ -16,12 +18,7 @@ const JoinGroup = () => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [code, setCode] = useState('')
-    
-    const validatePassword = (password) => {
-        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-        return passwordRegex.test(password);
-    };
-    
+
 
     const handleSignUp = async (e) => {
         e.preventDefault();
@@ -30,10 +27,10 @@ const JoinGroup = () => {
             return;
         }
 
-        if (!validatePassword(password)) {
-            setError("Password does not meet requirements");
-            return;
-        }
+        // if (!result.valid) {
+        //     setError(result.errors);
+        //     return;
+        // }
 
         try {
             const response = await fetch(`${url}/joinGroup`, {
@@ -57,6 +54,9 @@ const JoinGroup = () => {
             setError("An error occurred while signing up.");
         }
     };
+
+    const result = validatePassword(password);
+
     return (
         <div>
             <BackButton text="Back to Group Choosing" link='/groupSignUpChoice' />
@@ -119,6 +119,17 @@ const JoinGroup = () => {
                             required
                         />
                     </div>
+                    <div className="mt-2">
+                        <p className="mb-1 text-light"><b>Password must include:</b></p>
+                        <ul className="list-unstyled">
+                            <li style={{ opacity: result.checks.length ? 0.4 : 1 }} className="text-warning">• At least 8 characters</li>
+                            <li style={{ opacity: result.checks.lowercase ? 0.4 : 1 }} className="text-warning">• A lowercase letter</li>
+                            <li style={{ opacity: result.checks.uppercase ? 0.4 : 1 }} className="text-warning">• An uppercase letter</li>
+                            <li style={{ opacity: result.checks.number ? 0.4 : 1 }} className="text-warning">• A number</li>
+                            <li style={{ opacity: result.checks.special ? 0.4 : 1 }} className="text-warning">• A special character (@$!%*?&)</li>
+                        </ul>
+                    </div>
+
                     <div className="mb-3 mt-3">
                         <label htmlFor="code" className="form-label"> <b>Code for the Group you are joining:</b></label>
                         <input
@@ -133,7 +144,11 @@ const JoinGroup = () => {
                         />
                     </div>
 
-                    {error && <p className="text-danger">{error}</p>}
+                    {error && (
+                        <ul style={{ color: 'text-warning' }}>
+                            {error.map((msg, idx) => <li key={idx}>{msg}</li>)}
+                        </ul>
+                    )}
 
 
                     <div className='d-flex justify-content-center py-4'>
