@@ -15,6 +15,18 @@ body {
     /* Prevents horizontal scroll if any element exceeds viewport */
 }
 
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  height: 100%;
+}
+
 /* 
 .container, .container-fluid {
     padding-left: 0 !important;

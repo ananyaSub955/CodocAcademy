@@ -167,14 +167,12 @@ const SpecialtyInfo = () => {
 
   return (
 
-    <div>
+    <div className="flex-1 flex flex-col">
       <BackButton text="Back to Dashboard" link='/user/dashboard'/>
 
       <h1 className="fs-1 fw-bold text-center text-darkFuschia mb-5">{specialty}</h1>
 
-      <div className="container">
-
-
+      <div className="container flex-grow">
         <div className="row">
           {/* Left column: Categories */}
           <div className="col-md-4 border-end">
