@@ -112,7 +112,7 @@ const SpecialtyInfo = () => {
       <>
         <p><strong>Clinical Tip:</strong> {getFieldValue(item, "Explanation/Clinical tip")}</p>
         <p><strong>ICD-10:</strong> {getFieldValue(item, "Explanation/ICD 10")}</p>
-        <p><strong>Documentation Tip:</strong> {getFieldValue(item, "Explanation/Coding/Documentation tip")}</p>
+        <p><strong>Coding/Documentation Tip:</strong> {getFieldValue(item, "Explanation/Coding/Documentation tip")}</p>
       </>
     );
   };
