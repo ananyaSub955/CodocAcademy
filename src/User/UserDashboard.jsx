@@ -12,7 +12,7 @@ const UserDashboard = () => {
     const [specialties, setSpecialties] = useState([]);
     const [bookmarks, setBookmarkedTopics] = useState([]);
     const [recentlyViewed, setRecentlyViewed] = useState([]);
-    const [recommendations, setRecommendations] = useState([]);
+    //const [recommendations, setRecommendations] = useState([]);
 
 
     const navigate = useNavigate();
@@ -58,13 +58,13 @@ const UserDashboard = () => {
                         setRecentlyViewed(sorted.slice(0, 10));
                     })
                     .catch(err => console.error("Error fetching recently viewed:", err));
-                fetch(`${url}/user/${data.id}/recommendations`, { credentials: "include" })
-                    .then(async (res) => {
-                        if (!res.ok) throw new Error("Failed to fetch recommendations");
-                        const recs = await res.json();
-                        console.log(recs);
-                        setRecommendations(recs);
-                    })
+                // fetch(`${url}/user/${data.id}/recommendations`, { credentials: "include" })
+                //     .then(async (res) => {
+                //         if (!res.ok) throw new Error("Failed to fetch recommendations");
+                //         const recs = await res.json();
+                //         console.log(recs);
+                //         setRecommendations(recs);
+                //     })
             })
             .catch(error => console.error("Error fetching session:", error));
 
@@ -81,7 +81,7 @@ const UserDashboard = () => {
             .catch(error => console.error("Error fetching specialties:", error));
     }, []);
 
-    const tagsPerPage = 5;
+    const tagsPerPage = 10;
     const visibleTags = specialties.slice(currentTagIndex, currentTagIndex + tagsPerPage);
 
     const nextTags = () => {
@@ -165,7 +165,7 @@ const UserDashboard = () => {
 
                 {/* Tags Row */}
                 <div className="flex items-center justify-center gap-2 mb-5 mt-5">
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 cursor-pointer">
                         <FiChevronLeft
                             className={`cursor-pointer ${currentTagIndex === 0 ? 'text-gray-300' : 'text-black'}`}
                             size={24}
@@ -193,7 +193,7 @@ const UserDashboard = () => {
             <div className="max-w-4xl space-y-8 flex items-center justify-center align-items">
                 <Section title="Bookmarks" cards={renderCards("Bookmarks", bookmarks)} />
                 <Section title="Recently Viewed" cards={renderCards("Recently Viewed", recentlyViewed)} />
-                <Section title="Recommended Topics" cards={renderCards("Recommended Topics", recommendations)} />
+                {/* <Section title="Recommended Topics" cards={renderCards("Recommended Topics", recommendations)} /> */}
             </div>
         </div>
     );
@@ -218,35 +218,41 @@ const Section = ({ title, cards }) => {
     return (
         <div className="mb-5">
             <h2 className="fs-2 fw-bold text-darkFuschia mb-3 mx-3">{title}</h2>
-            <div className="d-flex align-items-center justify-content-center gap-2">
-                <button
-                    className="btn btn-link p-0 m-0"
-                    onClick={handlePrev}
-                    disabled={currentPage === 0}
-                    style={{ minWidth: 'auto' }}
-                >
-                    <FiChevronLeft
-                        size={24}
-                        className={currentPage === 0 ? 'text-gray-300' : 'text-black'}
-                    />
-                </button>
-
-                <div className="d-flex flex-column flex-md-row justify-content-center align-items-stretch gap-3">
-                    {visibleCards}
+            {cards.length === 0 ? (
+                <div className="text-center text-secondary fst-italic">
+                    No {title.toLowerCase()} yet.
                 </div>
+            ) : (
+                <div className="d-flex align-items-center justify-content-center gap-2">
+                    <button
+                        className="btn btn-link p-0 m-0"
+                        onClick={handlePrev}
+                        disabled={currentPage === 0}
+                        style={{ minWidth: 'auto' }}
+                    >
+                        <FiChevronLeft
+                            size={24}
+                            className={currentPage === 0 ? 'text-gray-300' : 'text-black'}
+                        />
+                    </button>
 
-                <button
-                    className="btn btn-link p-0 m-0"
-                    onClick={handleNext}
-                    disabled={currentPage >= totalPages - 1}
-                    style={{ minWidth: 'auto' }}
-                >
-                    <FiChevronRight
-                        size={24}
-                        className={currentPage === 0 ? 'text-gray-300' : 'text-black'}
-                    />
-                </button>
-            </div>
+                    <div className="d-flex flex-column flex-md-row justify-content-center align-items-stretch gap-3">
+                        {visibleCards}
+                    </div>
+
+                    <button
+                        className="btn btn-link p-0 m-0"
+                        onClick={handleNext}
+                        disabled={currentPage >= totalPages - 1}
+                        style={{ minWidth: 'auto' }}
+                    >
+                        <FiChevronRight
+                            size={24}
+                            className={currentPage === 0 ? 'text-gray-300' : 'text-black'}
+                        />
+                    </button>
+                </div>
+            )}
         </div>
     );
 };
