@@ -12,6 +12,7 @@ import IndividualSignUp from './pages/IndividualSignUp.jsx';
 import CreateGroup from './pages/CreateGroup.jsx';
 import JoinGroup from './pages/JoinGroup.jsx';
 import GroupConfirmation from './pages/GroupConfirmation.jsx';
+import SubscriptionPage from './pages/SubscriptionPage.jsx';
 
 import UserLayout from './User/layout/UserLayout.jsx';
 import UserDashboard from './User/UserDashboard.jsx';
@@ -38,6 +39,7 @@ const App = () => {
           <Route path='createGroup' element={<CreateGroup />} />
           <Route path='joinGroup' element={<JoinGroup />} />
           <Route path='groupConfirmation' element={<GroupConfirmation />} />
+          <Route path='subscription' element={<SubscriptionPage />} />
           < Route path='*' element={<NotFound />} />
         </Route>
 

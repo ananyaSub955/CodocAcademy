@@ -19,6 +19,8 @@ const IndividualSignUp = () => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     //const [result, setResult] = useState('');
+    const [frequency, setFrequency] = useState('monthly');
+
 
 
     const handleSignUp = async (e) => {
@@ -27,11 +29,6 @@ const IndividualSignUp = () => {
             alert("Please fill in all fields.");
             return;
         }
-
-        // if (!result.valid) {
-        //     setError(result.errors);
-        //     return;
-        // }
 
         try {
             const response = await fetch(`${url}/individualSignup`, {
@@ -45,8 +42,25 @@ const IndividualSignUp = () => {
             console.log("Response data:", data);
 
             if (response.ok) {
-                alert(data.message);
-                navigate("/user/dashboard");
+                const checkoutRes = await fetch(`${url}/createCheckoutSession`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "include",
+                    body: JSON.stringify({
+                        planType: 'individual',
+                        frequency,
+                        navigationPath: 'user/dashboard'
+                       // sucessUrl: `${url}/user/dashboard`
+                    }),
+                });
+
+                const checkoutData = await checkoutRes.json();
+                if (checkoutRes.ok) {
+                    window.location.href = checkoutData.url;
+                } else {
+                    alert("Signup succeeded but payment failed. Please try again.");
+                    console.error("Stripe error:", checkoutData);
+                }
             } else {
                 setError(data.message);
             }
@@ -132,6 +146,20 @@ const IndividualSignUp = () => {
                             <li style={{ opacity: result.checks.special ? 0.4 : 1 }} className="text-warning">• A special character (@$!%*?&)</li>
                         </ul>
                     </div>
+
+                    <div className="mb-3 mt-3">
+                        <label htmlFor="frequency" className="form-label"><b>Billing Frequency:</b></label>
+                        <select
+                            id="frequency"
+                            className="bg-lightBlue form-control"
+                            value={frequency}
+                            onChange={(e) => setFrequency(e.target.value)}
+                        >
+                            <option value="monthly">Monthly</option>
+                            <option value="yearly">Yearly</option>
+                        </select>
+                    </div>
+
 
 
                     <div className='d-flex justify-content-center py-4'>
