@@ -146,7 +146,7 @@ app.post("/login", async (req, res) => {
 app.post("/individualSignup", async (req, res) => {
 
     try {
-        const { firstName, lastName, email, password } = req.body;
+        const { firstName, lastName, email, password, frequency } = req.body;
 
         // Check if user already exists
         const existingUser = await userCollection.findOne({ email });
@@ -154,43 +154,64 @@ app.post("/individualSignup", async (req, res) => {
             return res.status(400).json({ message: "Email already in use" });
         }
 
-        const lastUser = await userCollection.find().sort({ id: -1 }).limit(1).toArray();
-        const newId = lastUser.length > 0 ? lastUser[0].id + 1 : 1;
+        // const lastUser = await userCollection.find().sort({ id: -1 }).limit(1).toArray();
+        // const newId = lastUser.length > 0 ? lastUser[0].id + 1 : 1;
 
-        // Hash password
-        const hashedPassword = await bcrypt.hash(password, 10);
+        // // Hash password
+        // const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Create new user
-        const newUser = await userCollection.insertOne({
-            id: newId,
-            firstName,
-            lastName,
-            email,
-            password: hashedPassword,
-            inGroup: false,
-            groupLeader: false,
-            individualUser: true,
-            superAdmin: false,
-            bookmarks: [],
-            recientlyViewed: [],
-            code: null
-        });
+        // // Create new user
+        // const newUser = await userCollection.insertOne({
+        //     id: newId,
+        //     firstName,
+        //     lastName,
+        //     email,
+        //     password: hashedPassword,
+        //     inGroup: false,
+        //     groupLeader: false,
+        //     individualUser: true,
+        //     superAdmin: false,
+        //     bookmarks: [],
+        //     recientlyViewed: [],
+        //     code: null
+        // });
 
         // Store user information in session
-        req.session.user = {
-            id: newId,
-            email,
-            firstName,
-            lastName,
-            inGroup: false,
-            groupLeader: false,
-            individualUser: true,
-            superAdmin: false,
+        // req.session.user = {
+        //     id: newId,
+        //     email,
+        //     firstName,
+        //     lastName,
+        //     inGroup: false,
+        //     groupLeader: false,
+        //     individualUser: true,
+        //     superAdmin: false,
+        // };
+        // req.session.userId = newUser.insertedId.toString(); // ✅ this is needed
+
+
+        // res.status(201).json({ message: "Signup successful!" });
+
+        req.session.pendingSignup = {
+            type: "individual",
+            formData: { firstName, lastName, email, password },
+            frequency,
         };
-        req.session.userId = newUser.insertedId.toString(); // ✅ this is needed
 
+        const priceId = frequency === "yearly"
+            ? 'price_1RnTtaFa5BATz5g02VLVxJyI'
+            : 'price_1Rlr0eFa5BATz5g0m33bFvi8';
 
-        res.status(201).json({ message: "Signup successful!" });
+        const session = await stripe.checkout.sessions.create({
+            mode: 'subscription',
+            payment_method_types: ['card'],
+            customer_email: email,
+            line_items: [{ price: priceId, quantity: 1 }],
+            success_url: `${baseUrl}/success`,
+            cancel_url: `${baseUrl}/cancel`,
+        });
+
+        res.json({ url: session.url });
     } catch (error) {
         res.status(500).json({ message: "Error signing up", error: error.message });
     }
@@ -262,59 +283,90 @@ app.post("/joinGroup", async (req, res) => {
 app.post("/createGroup", async (req, res) => {
 
     try {
-        const { groupName, email, password, code } = req.body;
+        const { groupName, email, password, code, frequency, groupSize } = req.body;
 
-        const existingGroup = await groupCollection.findOne({ code });
-        if (existingGroup) return res.status(400).json({ message: "Code already in use" });
+        const size = groupSize;
 
-        const existingUser = await userCollection.findOne({ email });
-        if (existingUser) return res.status(400).json({ message: "Email already used as user" });
+        // const existingGroup = await groupCollection.findOne({ code });
+        // if (existingGroup) return res.status(400).json({ message: "Code already in use" });
 
-        const lastGroup = await groupCollection.find().sort({ id: -1 }).limit(1).toArray();
-        const newId = lastGroup.length > 0 ? lastGroup[0].id + 1 : 1;
+        // const existingUser = await userCollection.findOne({ email });
+        // if (existingUser) return res.status(400).json({ message: "Email already used as user" });
 
-        const lastUser = await userCollection.find().sort({ id: -1 }).limit(1).toArray();
-        const newUserId = lastUser.length > 0 ? lastUser[0].id + 1 : 1;
+        // const lastGroup = await groupCollection.find().sort({ id: -1 }).limit(1).toArray();
+        // const newId = lastGroup.length > 0 ? lastGroup[0].id + 1 : 1;
 
-        const hashedPassword = await bcrypt.hash(password, 10);
+        // const lastUser = await userCollection.find().sort({ id: -1 }).limit(1).toArray();
+        // const newUserId = lastUser.length > 0 ? lastUser[0].id + 1 : 1;
 
-        const newGroup = await groupCollection.insertOne({
-            id: newId,
-            groupName,
-            email,
-            password: hashedPassword,
-            code,
-            members: []
-        });
+        // const hashedPassword = await bcrypt.hash(password, 10);
 
-        const result = await userCollection.insertOne({
-            id: newUserId,
-            email,
-            password: hashedPassword,
-            firstName: groupName,
-            lastName: "Admin",
-            inGroup: true,
-            groupLeader: true,
-            individualUser: false,
-            superAdmin: false,
-            code: code
-        });
+        // const newGroup = await groupCollection.insertOne({
+        //     id: newId,
+        //     groupName,
+        //     email,
+        //     password: hashedPassword,
+        //     code,
+        //     members: []
+        // });
 
-        req.session.user = {
-            id: newUserId,
-            email,
-            groupLeader: true,
-            inGroup: true,
-            individualUser: false,
-            superAdmin: false,
-            code: code,
+        // const result = await userCollection.insertOne({
+        //     id: newUserId,
+        //     email,
+        //     password: hashedPassword,
+        //     firstName: groupName,
+        //     lastName: "Admin",
+        //     inGroup: true,
+        //     groupLeader: true,
+        //     individualUser: false,
+        //     superAdmin: false,
+        //     code: code
+        // });
+
+        // req.session.user = {
+        //     id: newUserId,
+        //     email,
+        //     groupLeader: true,
+        //     inGroup: true,
+        //     individualUser: false,
+        //     superAdmin: false,
+        //     code: code,
+        // };
+
+        // req.session.userId = result.insertedId.toString(); // ✅ this is what /session reads
+
+
+        // //req.session.userId = newGroup.insertedId.toString();
+        // res.status(201).json({ message: "Group creation successful!", code });
+
+        let priceId;
+        if (size === "lt10") {
+            priceId = frequency === "monthly"
+                ? "price_1RlrK2Fa5BATz5g0SgC8m6yW"
+                : "price_1RnTsxFa5BATz5g0xaZOoKAa";
+        } else {
+            priceId = frequency === "monthly"
+                ? "price_1RlrIxFa5BATz5g0DSuWVrtb"
+                : "price_1RnTsIFa5BATz5g0I2SHe2qw";
+        }
+
+        req.session.pendingSignup = {
+            type: "group",
+            formData: { groupName, email, password, code },
+            frequency,
+            size: groupSize
         };
 
-        req.session.userId = result.insertedId.toString(); // ✅ this is what /session reads
+        const session = await stripe.checkout.sessions.create({
+            mode: 'subscription',
+            payment_method_types: ['card'],
+            customer_email: email,
+            line_items: [{ price: priceId, quantity: 1 }],
+            success_url: `${baseUrl}/success`,
+            cancel_url: `${baseUrl}/cancel`,
+        });
 
-
-        //req.session.userId = newGroup.insertedId.toString();
-        res.status(201).json({ message: "Group creation successful!", code });
+        res.json({ url: session.url });
 
 
     } catch (error) {
@@ -339,40 +391,103 @@ app.get("/generateGroupCode", async (req, res) => {
 });
 
 
-app.post("/createCheckoutSession", async (req, res) => {
-    const { planType, frequency, size, navigationPath } = req.body;
 
-    let priceId;
+app.post("/finalizeSignup", async (req, res) => {
+    const signup = req.session.pendingSignup;
+    if (!signup) return res.status(400).json({ message: "No pending signup" });
 
-    if (planType === 'individual') {
-        priceId = frequency === 'monthly'
-            ? 'price_1Rlr0eFa5BATz5g0m33bFvi8'
-            : 'price_1RnTtaFa5BATz5g02VLVxJyI';
-    } else if (planType === 'group') {
-        const groupSize = parseInt(size, 10);
-        const tier = groupSize < 10 ? '<10' : '10+';
+    const { type, frequency, size, formData } = signup;
+    const plan = type === "group"
+        ? `group_${size}_${frequency}`
+        : `individual_${frequency}`;
 
-        if (tier === '<10') {
-            priceId = frequency === 'monthly' ? 'price_1RlrK2Fa5BATz5g0SgC8m6yW' : 'price_1RnTsxFa5BATz5g0xaZOoKAa';
-        } else {
-            priceId = frequency === 'monthly' ? 'price_1RlrIxFa5BATz5g0DSuWVrtb' : 'price_1RnTsIFa5BATz5g0I2SHe2qw';
-        }
-    }
+    const existingGroup = await groupCollection.findOne({ code });
+    if (existingGroup) return res.status(400).json({ message: "Code already in use" });
 
-    try {
-        const session = await stripe.checkout.sessions.create({
-            mode: 'subscription',
-            payment_method_types: ['card'],
-            line_items: [{ price: priceId, quantity: 1 }],
-            success_url: `${baseUrl}/${navigationPath}`,
-            cancel_url: `${baseUrl}/cancel`,
+    const existingUser = await userCollection.findOne({ email });
+    if (existingUser) return res.status(400).json({ message: "Email already used as user" });
+
+    const lastGroup = await groupCollection.find().sort({ id: -1 }).limit(1).toArray();
+    const newId = lastGroup.length > 0 ? lastGroup[0].id + 1 : 1;
+
+    const lastUser = await userCollection.find().sort({ id: -1 }).limit(1).toArray();
+    const newUserId = lastUser.length > 0 ? lastUser[0].id + 1 : 1;
+    const hashedPassword = await bcrypt.hash(formData.password, 10);
+
+    if (type === "individual") {
+        await userCollection.insertOne({
+            ...formData,
+            password: hashedPassword,
+            hasPaid: true,
+            plan,
+            inGroup: false,
+            groupLeader: false,
+            individualUser: true,
+            superAdmin: false,
+            bookmarks: [],
+            recentlyViewed: [],
         });
 
-        res.json({ url: session.url });
-    } catch (err) {
-        console.error('Stripe error:', err);
-        res.status(500).json({ error: 'Internal Server Error' });
+        const user = await userCollection.findOne({ email: formData.email });
+
+        req.session.user = {
+            id: user._id,
+            email: user.email,
+            firstName: user.firstName,
+            code: user.code,
+            groupLeader: false,
+            inGroup: false,
+            individualUser: true,
+            superAdmin: false,
+        };
+
+        req.session.userId = user._id.toString(); 
+    } else if (type === "group") {
+        await groupCollection.insertOne({
+            groupName: formData.groupName,
+            email: formData.email,
+            password: hashedPassword,
+            code: formData.code,
+            members: [],
+            hasPaid: true,
+            plan,
+        });
+
+        await userCollection.insertOne({
+            email: formData.email,
+            password: hashedPassword,
+            firstName: formData.groupName,
+            lastName: "Admin",
+            inGroup: true,
+            groupLeader: true,
+            individualUser: false,
+            superAdmin: false,
+            code: formData.code,
+            hasPaid: true,
+            plan,
+        });
+
+        const user = await userCollection.findOne({ email: formData.email });
+
+        req.session.user = {
+            id: user._id,
+            email: user.email,
+            firstName: user.firstName,
+            code: user.code,
+            groupLeader: true,
+            inGroup: true,
+            individualUser: false,
+            superAdmin: false,
+        };
+
+        req.session.userId = user._id.toString(); 
     }
+
+    delete req.session.pendingSignup;
+    res.json({
+        success: true,
+        groupLeader: type === "group",
+    });
 
 });
 
