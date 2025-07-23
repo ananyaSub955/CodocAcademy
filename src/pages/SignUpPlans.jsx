@@ -21,6 +21,12 @@ const SignUpPlans = () => {
                             Price: $--.--/year
                         </h2>
 
+                        <br/>
+                        
+                        <h2 className="bg-lightBlue rounded p-3 text-center my-2 fs-5 d-inline-block">
+                            Price: $--.--/year
+                        </h2>
+
                         <ul className='list-group bg-transparent border-0'>
                             <li className='list-group-item bg-transparent border-0 text-white fs-4'>✓ Benefit 1</li>
                             <li className='list-group-item bg-transparent border-0 text-white fs-4'>✓ Benefit 2</li>
@@ -46,6 +52,12 @@ const SignUpPlans = () => {
                     </h2>
 
                     <div className="text-center mb-5">
+                        <h2 className="bg-lightBlue rounded p-3 text-center my-2 fs-5 d-inline-block">
+                            Price: $--.--/month
+                        </h2>
+                        
+                        <br/>
+
                         <h2 className="bg-lightBlue rounded p-3 text-center my-2 fs-5 d-inline-block">
                             Price: $--.--/year
                         </h2>

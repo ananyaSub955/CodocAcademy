@@ -3,6 +3,8 @@ const cors = require('cors');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config({ path: 'config.env' });
 
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+
 const app = express();
 const PORT = 5000;
 
@@ -17,6 +19,8 @@ const bcrypt = require("bcryptjs");
 const { data } = require('react-router-dom');
 
 const uri = process.env.MONGOURL;
+const baseUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+
 
 const client = new MongoClient(uri, {
     serverApi: {
@@ -334,6 +338,43 @@ app.get("/generateGroupCode", async (req, res) => {
     res.json({ code });
 });
 
+
+app.post("/createCheckoutSession", async (req, res) => {
+    const { planType, frequency, size, navigationPath } = req.body;
+
+    let priceId;
+
+    if (planType === 'individual') {
+        priceId = frequency === 'monthly'
+            ? 'price_1Rlr0eFa5BATz5g0m33bFvi8'
+            : 'price_1RnTtaFa5BATz5g02VLVxJyI';
+    } else if (planType === 'group') {
+        const groupSize = parseInt(size, 10);
+        const tier = groupSize < 10 ? '<10' : '10+';
+
+        if (tier === '<10') {
+            priceId = frequency === 'monthly' ? 'price_1RlrK2Fa5BATz5g0SgC8m6yW' : 'price_1RnTsxFa5BATz5g0xaZOoKAa';
+        } else {
+            priceId = frequency === 'monthly' ? 'price_1RlrIxFa5BATz5g0DSuWVrtb' : 'price_1RnTsIFa5BATz5g0I2SHe2qw';
+        }
+    }
+
+    try {
+        const session = await stripe.checkout.sessions.create({
+            mode: 'subscription',
+            payment_method_types: ['card'],
+            line_items: [{ price: priceId, quantity: 1 }],
+            success_url: `${baseUrl}/${navigationPath}`,
+            cancel_url: `${baseUrl}/cancel`,
+        });
+
+        res.json({ url: session.url });
+    } catch (err) {
+        console.error('Stripe error:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+
+});
 
 app.get("/specialties", async (req, res) => {
     if (!req.session.user) {

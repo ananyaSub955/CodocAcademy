@@ -17,6 +17,9 @@ const CreateGroup = () => {
     const [password, setPassword] = useState('');
     const [code, setCode] = useState('');
     const [error, setError] = useState('');
+    const [frequency, setFrequency] = useState('');
+    const [size, setSize] = useState('');
+
 
     const handleGroupCreation = async (e) => {
         e.preventDefault();
@@ -24,12 +27,6 @@ const CreateGroup = () => {
             alert("Please fill in all fields.");
             return;
         }
-
-        // if (!result.valid) {
-        //     setError(result.errors);
-        //     return;
-        // }
-
 
         try {
             const response = await fetch(`${url}/createGroup`, {
@@ -43,10 +40,27 @@ const CreateGroup = () => {
             console.log("Response data:", data);
 
             if (response.ok) {
-                alert(data.message);
-                navigate("/group/dashboard");
-            } else {
-                setError(data.message);
+                // const groupSize = 1; // Adjust this later if needed
+                // const frequency = 'monthly'; // or allow user to select
+
+                const checkoutRes = await fetch(`${url}/createCheckoutSession`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "include",
+                    body: JSON.stringify({
+                        planType: 'group',
+                        frequency,
+                        size,
+                        navigationPath: 'group/dashboard'
+                    }),
+                });
+
+                const checkoutData = await checkoutRes.json();
+                if (checkoutRes.ok) {
+                    window.location.href = checkoutData.url;
+                } else {
+                    setError(data.message);
+                }
             }
         } catch (error) {
             console.error("Signup error:", error);
@@ -84,7 +98,7 @@ const CreateGroup = () => {
                     <b>Group Sign up</b>
                 </h1>
 
-                <form className="bg-ultramarine p-3 rounded  text-light" onSubmit={handleGroupCreation}>
+                <form className="bg-ultramarine p-3 rounded text-light" onSubmit={handleGroupCreation}>
                     <div className="mb-3 mt-3">
                         <label htmlFor="groupName" className="form-label"> <b>Group Name:</b></label>
                         <input
@@ -134,6 +148,8 @@ const CreateGroup = () => {
                             <li style={{ opacity: result.checks.special ? 0.4 : 1 }} className="text-warning">• A special character (@$!%*?&)</li>
                         </ul>
                     </div>
+                    
+
 
                     <div className='d-flex justify-content-center my-4'>
                         <button
@@ -151,11 +167,44 @@ const CreateGroup = () => {
                         </p>
                     </div>
 
+                    <hr className='border-t-2' />
+                    
+                    <div className="mb-3 mt-3">
+                        <label htmlFor="size" className="form-label"><b>Group Size:</b></label>
+                        <select
+                            id="size"
+                            className="bg-lightBlue form-control"
+                            value={size}
+                            onChange={(e) => setSize(e.target.value)}
+                        >
+                            <option value="lt10">Less than 10 members:</option>
+                            <option value="gt10">Greater than 10 members: </option>
+                        </select>
+                    </div>
+        
+
+                    <div className="mb-3 mt-3">
+                        <label htmlFor="frequency" className="form-label"><b>Billing Frequency:</b></label>
+                        <select
+                            id="frequency"
+                            className="bg-lightBlue form-control"
+                            value={frequency}
+                            onChange={(e) => setFrequency(e.target.value)}
+                        >
+                            <option value="monthly">Monthly</option>
+                            <option value="yearly">Yearly</option>
+                        </select>
+                    </div>
+
                     {error && (
                         <ul style={{ color: 'text-warning' }}>
-                            {error.map((msg, idx) => <li key={idx}>{msg}</li>)}
+                            {Array.isArray(error)
+                                ? error.map((msg, idx) => <li key={idx}>{msg}</li>)
+                                : <li>{error}</li>
+                            }
                         </ul>
                     )}
+
 
 
                     <div className='d-flex justify-content-center py-4'>
