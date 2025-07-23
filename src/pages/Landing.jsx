@@ -17,15 +17,15 @@ const Landing = () => {
                         <h3 className="pl-3 lh-base d-flex justify-content-center fs-2  ">Sign up Now!</h3>
                         <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center gap-3 mt-4 pl-4 ">
                             <button
-                                className="bg-darkFuschia text-white px-4 py-2 rounded border border-darkFuschia transition-transform duration-300 hover:scale-105 hover:text-lg fs-3"
+                                className="btn btn-darkFuschia fs-2 p-4"
                                 onClick={() => navigate('/signUpPlans')}
                                 // style = {{textWrap:'nowrap'}}
                             >
                                 Company/Group Sign up
                             </button>
-                            <span className="font-semibold">OR</span>
+                            <span className="font-semibold fs-2">OR</span>
                             <button
-                                className="bg-darkFuschia text-white px-4 py-2 rounded border border-darkFuschia transition-transform duration-300 hover:scale-105 hover:text-lg fs-3"
+                                className="btn btn-darkFuschia fs-2 p-4"
                                 onClick={() => navigate('/signUpPlans')}
                                 // style = {{textWrap:'nowrap'}}
 

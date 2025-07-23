@@ -42,3 +42,9 @@ html, body {
     height: auto;
 }
 
+.loginHover:hover {
+  background-color: #D11E61; 
+  color: white !important;
+  transform: scale(1.05);
+  transition: all 0.3s ease;
+}

@@ -6,7 +6,7 @@ const BackButton = ({ text = "Back", link = "/signUpPlans" , marginLeft = '20px'
     return (
         <div className="mb-3">
             <button
-                className="bg-darkFuschia text-white px-4 py-2 rounded border border-darkFuschia d-flex align-items-center mt-4"
+                className="btn btn-darkFuschia p-3 mt-4"
                 style={{ marginLeft: marginLeft }}
                 onClick={() => navigate(link)}
             >

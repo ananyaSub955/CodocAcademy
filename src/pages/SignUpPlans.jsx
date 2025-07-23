@@ -12,7 +12,7 @@ const SignUpPlans = () => {
             <div className="row justify-content-center m-3">
                 <div className="col-12 col-md-3 bg-ultramarine mx-md-3 mb-3 mb-md-0 rounded">
                     {/* fs = font size  fw = font weight*/}
-                    <h2 className="bg-lightBlue rounded p-3 text-center my-4 fs-3 fs-md-2 fw-bold" style = {{maxHeight: '100px', textWrap:'nowrap'}}>
+                    <h2 className="bg-lightBlue rounded p-3 text-center my-4 fs-3 fs-md-2 fw-bold" style = {{maxHeight: '100px'}}>
                         Company Group Plan
                     </h2>
 
@@ -37,7 +37,7 @@ const SignUpPlans = () => {
                         </ul>
 
                         <button
-                            className="bg-darkFuschia text-white px-4 py-2 mt-2 rounded border border-darkFuschia transition-transform duration-300 hover:scale-105 hover:text-lg fs-3"
+                            className="btn btn-darkFuschia fs-2 p-3 mt-2"
                             onClick={() => navigate('/groupSignUpChoice')}
                         >
                             Create/Join Group <i className="fas fa-chevron-right"></i>
@@ -72,7 +72,7 @@ const SignUpPlans = () => {
                         </ul>
 
                         <button
-                            className="bg-darkFuschia text-white px-4 py-2 mt-2 rounded border border-darkFuschia transition-transform duration-300 hover:scale-105 hover:text-lg fs-3"
+                            className="btn btn-darkFuschia fs-2 p-3 mt-2"
                             onClick={() => navigate('/individualSignUp')}
                         >
                             Create Account <i className="fas fa-chevron-right"></i>
