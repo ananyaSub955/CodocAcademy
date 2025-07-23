@@ -19,7 +19,7 @@ const CreateJoinGroup = () => {
                     </h1>
                     <div className="d-flex justify-content-center pt-4">
                         <button
-                            className="bg-darkFuschia text-white px-4 py-2 mt-2 rounded border border-darkFuschia transition-transform duration-300 hover:scale-105 hover:text-lg fs-3"
+                            className="btn btn-darkFuschia px-4 py-2 fs-3"
                             onClick={() => navigate('/createGroup')}
                         >
                             Create Group <i className="fas fa-chevron-right"></i>
@@ -31,7 +31,7 @@ const CreateJoinGroup = () => {
                     </h4>
                     <div className="d-flex justify-content-center pb-4">
                         <button
-                            className="bg-darkFuschia text-white px-4 py-2 mt-2 rounded border border-darkFuschia transition-transform duration-300 hover:scale-105 hover:text-lg fs-3"
+                            className="btn btn-darkFuschia px-4 py-2 fs-3"
                             onClick={() => navigate('/joinGroup')}
                         >
                             Join a Group <i className="fas fa-chevron-right"></i>
