@@ -23,47 +23,30 @@ const CreateGroup = () => {
 
     const handleGroupCreation = async (e) => {
         e.preventDefault();
-        if (!groupName || !email || !password || !code) {
-            alert("Please fill in all fields.");
-            return;
-        }
+        if (!groupName) return alert("Please enter a group name.");
+        if (!email) return alert("Please enter an email address.");
+        if (!password) return alert("Please enter a password.");
+        if (!code) return alert("Please generate or enter a group code.");
+        if (!size) return alert("Please select a group size.");
+        if (!frequency) return alert("Please select a billing frequency.");
+
 
         try {
             const response = await fetch(`${url}/createGroup`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ groupName, email, password, code }),
+                body: JSON.stringify({ groupName, email, password, code, frequency, groupSize: size }),
                 credentials: "include",
             });
 
             const data = await response.json();
-            console.log("Response data:", data);
-
-            if (response.ok) {
-                // const groupSize = 1; // Adjust this later if needed
-                // const frequency = 'monthly'; // or allow user to select
-
-                const checkoutRes = await fetch(`${url}/createCheckoutSession`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    credentials: "include",
-                    body: JSON.stringify({
-                        planType: 'group',
-                        frequency,
-                        size,
-                        navigationPath: 'group/dashboard'
-                    }),
-                });
-
-                const checkoutData = await checkoutRes.json();
-                if (checkoutRes.ok) {
-                    window.location.href = checkoutData.url;
-                } else {
-                    setError(data.message);
-                }
+            if (response.ok && data.url) {
+                window.location.href = data.url; // Stripe checkout
+            } else {
+                setError(data.message || "Group signup failed.");
             }
-        } catch (error) {
-            console.error("Signup error:", error);
+        } catch (err) {
+            console.error("Signup error:", err);
             setError("An error occurred while signing up.");
         }
     };
@@ -148,7 +131,7 @@ const CreateGroup = () => {
                             <li style={{ opacity: result.checks.special ? 0.4 : 1 }} className="text-warning">• A special character (@$!%*?&)</li>
                         </ul>
                     </div>
-                    
+
 
 
                     <div className='d-flex justify-content-center my-4'>
@@ -168,7 +151,7 @@ const CreateGroup = () => {
                     </div>
 
                     <hr className='border-t-2' />
-                    
+
                     <div className="mb-3 mt-3">
                         <label htmlFor="size" className="form-label"><b>Group Size:</b></label>
                         <select
@@ -181,7 +164,7 @@ const CreateGroup = () => {
                             <option value="gt10">Greater than 10 members: </option>
                         </select>
                     </div>
-        
+
 
                     <div className="mb-3 mt-3">
                         <label htmlFor="frequency" className="form-label"><b>Billing Frequency:</b></label>

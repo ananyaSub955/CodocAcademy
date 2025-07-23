@@ -22,7 +22,6 @@ const IndividualSignUp = () => {
     const [frequency, setFrequency] = useState('monthly');
 
 
-
     const handleSignUp = async (e) => {
         e.preventDefault();
         if (!firstName || !lastName || !email || !password) {
@@ -34,41 +33,22 @@ const IndividualSignUp = () => {
             const response = await fetch(`${url}/individualSignup`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ firstName, lastName, email, password }),
+                body: JSON.stringify({ firstName, lastName, email, password, frequency }),
                 credentials: "include",
             });
 
             const data = await response.json();
-            console.log("Response data:", data);
-
-            if (response.ok) {
-                const checkoutRes = await fetch(`${url}/createCheckoutSession`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    credentials: "include",
-                    body: JSON.stringify({
-                        planType: 'individual',
-                        frequency,
-                        navigationPath: 'user/dashboard'
-                       // sucessUrl: `${url}/user/dashboard`
-                    }),
-                });
-
-                const checkoutData = await checkoutRes.json();
-                if (checkoutRes.ok) {
-                    window.location.href = checkoutData.url;
-                } else {
-                    alert("Signup succeeded but payment failed. Please try again.");
-                    console.error("Stripe error:", checkoutData);
-                }
+            if (response.ok && data.url) {
+                window.location.href = data.url; // Stripe checkout
             } else {
-                setError(data.message);
+                setError(data.message || "Signup failed.");
             }
-        } catch (error) {
-            console.error("Signup error:", error);
-            setError("An error occurred while signing up.");
+        } catch (err) {
+            console.error("Signup error:", err);
+            setError("An error occurred during signup.");
         }
     };
+
 
     const result = validatePassword(password);
 
