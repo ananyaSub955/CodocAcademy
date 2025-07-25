@@ -11,12 +11,8 @@ const url = window.location.hostname === "localhost"
 
 const SpecialtyInfo = () => {
   const { specialty } = useParams();
-  //const location = useLocation();
-  //const { userId, userBookmarks } = location.state || {};
-  //const [bookmarkedTopics, setBookmarkedTopics] = useState(userBookmarks || []);
   const [userId, setUserId] = useState(null);
   const [bookmarkedTopics, setBookmarkedTopics] = useState([]);
-
 
   const [structuredData, setStructuredData] = useState({});
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -61,7 +57,15 @@ const SpecialtyInfo = () => {
     })
       .then(res => res.json())
       .then(result => {
-        const rawData = result.data || [];
+
+        const rawData = (result.data || []).map(item => {
+          const cleaned = {};
+          Object.entries(item).forEach(([key, value]) => {
+            cleaned[key.trim()] = typeof value === 'string' ? value.trim() : value;
+          });
+          return cleaned;
+        });
+
         const grouped = {};
 
         rawData.forEach(item => {
@@ -72,6 +76,9 @@ const SpecialtyInfo = () => {
           if (!grouped[cat][sub]) grouped[cat][sub] = [];
 
           grouped[cat][sub].push(item);
+
+          console.log(item);
+
         });
 
         setStructuredData(grouped);
@@ -110,9 +117,9 @@ const SpecialtyInfo = () => {
 
     return (
       <>
-        <p><strong>Clinical Tip:</strong> {getFieldValue(item, "Explanation/Clinical tip")}</p>
-        <p><strong>ICD-10:</strong> {getFieldValue(item, "Explanation/ICD 10")}</p>
-        <p><strong>Coding/Documentation Tip:</strong> {getFieldValue(item, "Explanation/Coding/Documentation tip")}</p>
+        <p><strong>Clinical Tip:</strong> {getFieldValue(item, "Clinical tip")}</p>
+        <p><strong>ICD-10:</strong> {getFieldValue(item, "ICD 10")}</p>
+        <p><strong>Coding/Documentation Tip:</strong> {getFieldValue(item, "Coding/Documentation tip")}</p>
       </>
     );
   };
@@ -121,7 +128,6 @@ const SpecialtyInfo = () => {
     const itemId = String(item._id).trim();
     return bookmarkedTopics.some(b => String(b._id).trim() === itemId);
   };
-
 
 
   const toggleBookmark = async (item) => {
@@ -168,7 +174,7 @@ const SpecialtyInfo = () => {
   return (
 
     <div className="flex-1 flex flex-col">
-      <BackButton text="Back to Dashboard" link='/user/dashboard'/>
+      <BackButton text="Back to Dashboard" link='/user/dashboard' />
 
       <h1 className="fs-1 fw-bold text-center text-darkFuschia mb-5">{specialty}</h1>
 
