@@ -140,13 +140,22 @@ const IndividualSignUp = () => {
                         </select>
                     </div>
 
-
+                     {error && (
+                        <ul style={{ color: 'text-warning' }}>
+                            {Array.isArray(error)
+                                ? error.map((msg, idx) => <li key={idx}>{msg}</li>)
+                                : <li>{error}</li>
+                            }
+                        </ul>
+                    )}
 
                     <div className='d-flex justify-content-center py-4'>
                         <button className="btn btn-darkFuschia text-center fs-4 border border-black" >
                             Sign Up
                         </button>
                     </div>
+
+                    
                 </form>
             </div>
         </div>
