@@ -164,29 +164,32 @@ const UserDashboard = () => {
                 <h1 className="fw-bold text-darkFuschia mb-6">{userId.firstName}'s Dashboard</h1>
 
                 {/* Tags Row */}
-                <div className="flex items-center justify-center gap-2 mb-5 mt-5">
-                    <div className="flex gap-2 cursor-pointer">
-                        <FiChevronLeft
-                            className={`cursor-pointer ${currentTagIndex === 0 ? 'text-gray-300' : 'text-black'}`}
-                            size={24}
-                            onClick={prevTags}
-                        />
-                        {visibleTags.map((tag, index) => (
-                            <span
-                                key={tag.id}
-                                className={`px-4 py-2 rounded fw-medium mx-2 cursor-pointer ${index % 2 === 0 ? 'text-white bg-darkFuschia' : 'text-black bg-celeste'}`}
-                                onClick={() => handleTagClick(tag.name)}
-                            >
-                                {tag.name}
-                            </span>
-                        ))}
-                        <FiChevronRight
-                            className={`cursor-pointer ${(currentTagIndex + tagsPerPage) >= specialties.length ? 'text-gray-300' : 'text-black'}`}
-                            size={24}
-                            onClick={nextTags}
-                        />
+                <div className="relative w-full my-4 overflow-hidden">
+                    <div className="relative w-full overflow-hidden">
+                        <div
+                            className="flex flex-nowrap overflow-x-auto no-scrollbar px-2 py-2 space-x-3"
+                            style={{ scrollBehavior: 'smooth' }}
+                        >
+                            {specialties.map((tag, index) => (
+                                <span
+                                    key={tag.id}
+                                    onClick={() => handleTagClick(tag.name)}
+                                    className={`rounded me-2 cursor-pointer inline-block px-4 py-2 text-sm font-medium rounded-md ${index % 2 === 0 ? 'bg-darkFuschia text-white' : 'bg-celeste text-black'
+                                        }`}
+                                    style={{
+                                        whiteSpace: 'nowrap',
+                                        flex: '0 0 auto',
+                                    }}
+                                >
+                                    {tag.name}
+                                </span> 
+                            ))}
+                        </div>
                     </div>
+
                 </div>
+
+
             </div>
 
             {/* Main Content */}

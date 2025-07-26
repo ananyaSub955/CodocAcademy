@@ -48,3 +48,12 @@ html, body {
   transform: scale(1.05);
   transition: all 0.3s ease;
 }
+
+/* Add this to your global CSS if not already included
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+} */
