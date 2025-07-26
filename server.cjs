@@ -401,10 +401,13 @@ app.post("/finalizeSignup", async (req, res) => {
         ? `group_${size}_${frequency}`
         : `individual_${frequency}`;
 
-    const existingGroup = await groupCollection.findOne({ code });
+    const existingGroup = formData.code
+        ? await groupCollection.findOne({ code: formData.code })
+        : null;
+
     if (existingGroup) return res.status(400).json({ message: "Code already in use" });
 
-    const existingUser = await userCollection.findOne({ email });
+    const existingUser = await userCollection.findOne({ email: formData.email });
     if (existingUser) return res.status(400).json({ message: "Email already used as user" });
 
     const lastGroup = await groupCollection.find().sort({ id: -1 }).limit(1).toArray();
