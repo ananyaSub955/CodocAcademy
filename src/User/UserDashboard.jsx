@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 
@@ -12,6 +12,7 @@ const UserDashboard = () => {
     const [specialties, setSpecialties] = useState([]);
     const [bookmarks, setBookmarkedTopics] = useState([]);
     const [recentlyViewed, setRecentlyViewed] = useState([]);
+    const tagScrollRef = useRef(null);
     //const [recommendations, setRecommendations] = useState([]);
 
 
@@ -80,21 +81,7 @@ const UserDashboard = () => {
             })
             .catch(error => console.error("Error fetching specialties:", error));
     }, []);
-
-    const tagsPerPage = 10;
-    const visibleTags = specialties.slice(currentTagIndex, currentTagIndex + tagsPerPage);
-
-    const nextTags = () => {
-        if (currentTagIndex + tagsPerPage < specialties.length) {
-            setCurrentTagIndex(currentTagIndex + tagsPerPage);
-        }
-    };
-
-    const prevTags = () => {
-        if (currentTagIndex > 0) {
-            setCurrentTagIndex(currentTagIndex - tagsPerPage);
-        }
-    };
+    
 
     const handleTagClick = async (specialtyName) => {
         try {
