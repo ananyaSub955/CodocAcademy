@@ -441,7 +441,7 @@ app.post("/finalizeSignup", async (req, res) => {
             superAdmin: false,
         };
 
-        req.session.userId = user._id.toString(); 
+        req.session.userId = user._id.toString();
     } else if (type === "group") {
         await groupCollection.insertOne({
             groupName: formData.groupName,
@@ -480,7 +480,7 @@ app.post("/finalizeSignup", async (req, res) => {
             superAdmin: false,
         };
 
-        req.session.userId = user._id.toString(); 
+        req.session.userId = user._id.toString();
     }
 
     delete req.session.pendingSignup;
@@ -595,30 +595,43 @@ app.get('/user/:id/bookmarks', async (req, res) => {
 app.post("/user/recentlyViewed", async (req, res) => {
     const { userId, topic } = req.body;
 
-    if (!userId || !topic || !topic._id || !topic.SubTopics) {
-        return res.status(400).json({ message: "Missing topic data" });
+    if (!userId || !topic || !topic._id) {
+        return res.status(400).json({ message: "Missing required fields" });
     }
 
-    try {
-        await userCollection.updateOne(
-            { _id: new ObjectId(userId) },
-            {
-                $push: {
-                    recentlyViewed: {
-                        $each: [{ ...topic, timestamp: new Date() }],
-                        $position: 0,
-                        $slice: 10
-                    }
+    await userCollection.updateOne(
+        { _id: new ObjectId(userId) },
+        { $pull: { recentlyViewed: { _id: topic._id } } }
+    );
+
+    await userCollection.updateOne(
+        { _id: new ObjectId(userId) },
+        {
+            $push: {
+                recentlyViewed: {
+                    $each: [{ ...topic, timestamp: new Date() }],
+                    $position: 0
                 }
             }
-        );
+        }
+    );
 
-        res.json({ success: true });
-    } catch (error) {
-        console.error("Failed to update recently viewed:", error);
-        res.status(500).json({ message: "Server error" });
-    }
+    await userCollection.updateOne(
+        { _id: new ObjectId(userId) },
+        {
+            $push: {
+                recentlyViewed: {
+                    $each: [],
+                    $slice: 10
+                }
+            }
+        }
+    );
+
+    res.json({ success: true });
 });
+
+
 
 
 app.get('/user/:id/recentlyViewed', async (req, res) => {
@@ -633,75 +646,75 @@ app.get('/user/:id/recentlyViewed', async (req, res) => {
     }
 });
 
-app.get('/user/:id/recommendations', async (req, res) => {
-    const { id } = req.params;
-    if (!ObjectId.isValid(id)) return res.status(400).json({ error: "Invalid user ID" });
+// app.get('/user/:id/recommendations', async (req, res) => {
+//     const { id } = req.params;
+//     if (!ObjectId.isValid(id)) return res.status(400).json({ error: "Invalid user ID" });
 
-    const user = await userCollection.findOne({ _id: new ObjectId(id) });
-    const bookmarks = user.bookmarks || [];
+//     const user = await userCollection.findOne({ _id: new ObjectId(id) });
+//     const bookmarks = user.bookmarks || [];
 
-    const subtopicNames = bookmarks.map(b => b.name);
-    const bookmarkIds = new Set(bookmarks.map(b => String(b._id)));
+//     const subtopicNames = bookmarks.map(b => b.name);
+//     const bookmarkIds = new Set(bookmarks.map(b => String(b._id)));
 
-    const bookmarkSubTopics = new Set(bookmarks.map(b => (b.name || "").trim().toLowerCase()));
+//     const bookmarkSubTopics = new Set(bookmarks.map(b => (b.name || "").trim().toLowerCase()));
 
-    const categories = [...new Set(bookmarks.map(b => b.Category?.trim()).filter(Boolean))];
+//     const categories = [...new Set(bookmarks.map(b => b.Category?.trim()).filter(Boolean))];
 
-    const collections = ["Diabetes", "Renal", "Cardiology", "Vascular", "Neurology"];
-    let recommendations = [];
+//     const collections = ["Diabetes", "Renal", "Cardiology", "Vascular", "Neurology"];
+//     let recommendations = [];
 
-    for (let name of collections) {
-        const col = req.app.locals.db.collection(name);
-        //const subcategories = bookmarks.map(b => b.Subcategory).filter(Boolean);
-        const matches = await col.find({
-            $or: [
-                { SubTopics: { $in: subtopicNames } },
-                { Category: { $in: categories } }
-            ]
-        }).toArray();
+//     for (let name of collections) {
+//         const col = req.app.locals.db.collection(name);
+//         //const subcategories = bookmarks.map(b => b.Subcategory).filter(Boolean);
+//         const matches = await col.find({
+//             $or: [
+//                 { SubTopics: { $in: subtopicNames } },
+//                 { Category: { $in: categories } }
+//             ]
+//         }).toArray();
 
-        for (const item of matches) {
-            const idStr = String(item._id);
-            const nameStr = (item.SubTopics || "").trim().toLowerCase();
+//         for (const item of matches) {
+//             const idStr = String(item._id);
+//             const nameStr = (item.SubTopics || "").trim().toLowerCase();
 
-            const alreadySeen = bookmarkIds.has(idStr) || bookmarkSubTopics.has(nameStr);
+//             const alreadySeen = bookmarkIds.has(idStr) || bookmarkSubTopics.has(nameStr);
 
-            if (!alreadySeen) {
-                recommendations.push({
-                    _id: idStr,
-                    SubTopics: item.SubTopics || "",
-                    Category: item.Category || "",
-                    Subcategory: item.Subcategory || ""
-                });
-            }
-        }
+//             if (!alreadySeen) {
+//                 recommendations.push({
+//                     _id: idStr,
+//                     SubTopics: item.SubTopics || "",
+//                     Category: item.Category || "",
+//                     Subcategory: item.Subcategory || ""
+//                 });
+//             }
+//         }
 
-    }
+//     }
 
-    //console.log(recommendations);
+//     //console.log(recommendations);
 
-    // Remove already-bookmarked items
-    //const bookmarkIds = new Set(bookmarks.map(b => String(b._id)));
+//     // Remove already-bookmarked items
+//     //const bookmarkIds = new Set(bookmarks.map(b => String(b._id)));
 
-    // console.log("bookmark IDs:", [...bookmarkIds]);
-    // console.log("------");
-    // console.log("recommendation IDs:", recommendations.map(r => String(r._id)));
+//     // console.log("bookmark IDs:", [...bookmarkIds]);
+//     // console.log("------");
+//     // console.log("recommendation IDs:", recommendations.map(r => String(r._id)));
 
-    //const uniqueRecs = recommendations.filter(r => !bookmarkIds.has(String(r._id)));
+//     //const uniqueRecs = recommendations.filter(r => !bookmarkIds.has(String(r._id)));
 
-    //console.log(uniqueRecs);
-    //res.json(uniqueRecs.slice(0, 10));
+//     //console.log(uniqueRecs);
+//     //res.json(uniqueRecs.slice(0, 10));
 
-    const seen = new Set();
-    const unique = recommendations.filter(r => {
-        if (seen.has(r._id)) return false;
-        seen.add(r._id);
-        return true;
-    });
+//     const seen = new Set();
+//     const unique = recommendations.filter(r => {
+//         if (seen.has(r._id)) return false;
+//         seen.add(r._id);
+//         return true;
+//     });
 
-    //console.log(unique);
-    res.json(unique.slice(0, 10));
-});
+//     //console.log(unique);
+//     res.json(unique.slice(0, 10));
+// });
 
 app.get('/groups', async (req, res) => {
     try {

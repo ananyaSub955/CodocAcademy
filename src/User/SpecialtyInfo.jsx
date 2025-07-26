@@ -77,7 +77,7 @@ const SpecialtyInfo = () => {
 
           grouped[cat][sub].push(item);
 
-          console.log(item);
+          // console.log(item);
 
         });
 
@@ -96,24 +96,24 @@ const SpecialtyInfo = () => {
   };
 
   const TopicBody = ({ item }) => {
-    useEffect(() => {
-      if (userId && item._id) {
-        fetch(`${url}/user/recentlyViewed`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({
-            userId,
-            topic: {
-              _id: item._id,
-              SubTopics: item.SubTopics,
-              Category: item.Category,
-              Subcategory: item.Subcategory
-            }
-          })
-        }).catch(err => console.error("Track view error:", err));
-      }
-    }, []);
+    // useEffect(() => {
+    //   if (userId && item._id) {
+    //     fetch(`${url}/user/recentlyViewed`, {
+    //       method: "POST",
+    //       headers: { "Content-Type": "application/json" },
+    //       credentials: "include",
+    //       body: JSON.stringify({
+    //         userId,
+    //         topic: {
+    //           _id: item._id,
+    //           SubTopics: item.SubTopics,
+    //           Category: item.Category,
+    //           Subcategory: item.Subcategory
+    //         }
+    //       })
+    //     }).catch(err => console.error("Track view error:", err));
+    //   }
+    // }, []);
 
     return (
       <>
@@ -207,7 +207,26 @@ const SpecialtyInfo = () => {
                     <Accordion alwaysOpen>
                       {items.map((item, idx) => (
                         <Accordion.Item eventKey={`${subIdx}-${idx}`} key={idx}>
-                          <Accordion.Header>
+                          <Accordion.Header
+                            onClick={() => {
+                              if (userId && item._id) {
+                                fetch(`${url}/user/recentlyViewed`, {
+                                  method: "POST",
+                                  headers: { "Content-Type": "application/json" },
+                                  credentials: "include",
+                                  body: JSON.stringify({
+                                    userId,
+                                    topic: {
+                                      _id: item._id,
+                                      SubTopics: item.SubTopics,
+                                      Category: item.Category,
+                                      Subcategory: item.Subcategory
+                                    }
+                                  })
+                                }).catch(err => console.error("Track view error:", err));
+                              }
+                            }}
+                          >
                             <div className="d-flex justify-content-between align-items-center w-100">
                               <span>{item.SubTopics || "Unnamed SubTopic"}</span>
                               <div className="d-flex align-items-center mr-4">

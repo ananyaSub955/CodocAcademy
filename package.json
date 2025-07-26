@@ -28,7 +28,8 @@
     "react-router-dom": "^7.6.2",
     "sass": "^1.89.2",
     "stripe": "^18.3.0",
-    "tailwind-scrollbar-hide": "^4.0.0"
+    "tailwind-scrollbar-hide": "^4.0.0",
+    "usehooks-ts": "^3.1.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",

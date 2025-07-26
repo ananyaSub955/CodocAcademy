@@ -1,5 +1,14 @@
-.custom-active{
+.custom-active {
     background-color: #edc974 !important;
     /* background-color: #98CBCC !important; */
-        border: none;
+    border: none;
+}
+
+/* Hide scrollbar visually while keeping scrollability */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none; /* IE */
+  scrollbar-width: none; /* Firefox */
 }
