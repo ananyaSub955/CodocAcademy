@@ -81,7 +81,7 @@ const UserDashboard = () => {
             })
             .catch(error => console.error("Error fetching specialties:", error));
     }, []);
-    
+
 
     const handleTagClick = async (specialtyName) => {
         try {
@@ -114,9 +114,24 @@ const UserDashboard = () => {
             .join(' ');
     }
 
+    const handleTopicClick = (topic) => {
+        if (!topic?.specialty || !topic?._id) {
+            console.error("Invalid topic structure:", topic);
+            return;
+        }
+        navigate(`/user/${topic.specialty}/info`, {
+            state: {
+                userId: userId.id,
+                userBookmarks: bookmarks,
+                scrollToTopicId: topic._id,
+            },
+        });
+    };
+
 
     const renderCards = (section, data = []) => {
         return data.map((item, i) => (
+            // /<h1> ${item.name} </h1>
             <div
                 key={`${section}-${i}`}
                 className="d-flex justify-content-center"
@@ -126,9 +141,20 @@ const UserDashboard = () => {
                     maxWidth: '400px',
                     height: '15rem',
                 }}
+                onClick={() => {
+                    if (section === "Bookmarks" || section === "Recently Viewed") {
+                        handleTopicClick(item);
+                    } else {
+                        handleTagClick(item.name);
+                    }
+                }}
             >
+
                 <div
-                    className={`card text-center w-100 h-100 ${section == "Recently Viewed" ? ' text-dark bg-celeste' : 'text-white bg-ultramarine'}`}
+                    className={`cardHover card text-center w-100 h-100
+                         ${section == "Recently Viewed"
+                             ? 'bg-celeste text-dark' 
+                             : 'bg-ultramarine text-white'}`}
                     style={{ borderRadius: '10px' }}
                 >
                     <div className="card-body d-flex align-items-center justify-content-center fw-semibold fs-4 w-100">
@@ -143,6 +169,9 @@ const UserDashboard = () => {
     if (!userId) {
         return <div className="text-center mt-10 text-xl text-gray-600">Loading your dashboard...</div>;
     }
+
+
+
 
     return (
         <div className="min-h-screen p-6">
@@ -161,7 +190,10 @@ const UserDashboard = () => {
                                 <span
                                     key={tag.id}
                                     onClick={() => handleTagClick(tag.name)}
-                                    className={`rounded me-2 cursor-pointer inline-block px-4 py-2 text-sm font-medium rounded-md ${index % 2 === 0 ? 'bg-darkFuschia text-white' : 'bg-celeste text-black'
+                                    className={`tagHover rounded me-2 cursor-pointer inline-block px-4 py-2 text-sm font-medium rounded-md 
+                                        ${index % 2 === 0 ? 
+                                            'bg-darkFuschia text-white' 
+                                            :'bg-celeste text-black'
                                         }`}
                                     style={{
                                         whiteSpace: 'nowrap',
@@ -169,7 +201,7 @@ const UserDashboard = () => {
                                     }}
                                 >
                                     {tag.name}
-                                </span> 
+                                </span>
                             ))}
                         </div>
                     </div>
