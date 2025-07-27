@@ -17,8 +17,9 @@ const CreateGroup = () => {
     const [password, setPassword] = useState('');
     const [code, setCode] = useState('');
     const [error, setError] = useState('');
-    const [frequency, setFrequency] = useState('');
-    const [size, setSize] = useState('');
+    const [frequency, setFrequency] = useState('monthly');
+    const [size, setSize] = useState('lt10');
+
 
 
     const handleGroupCreation = async (e) => {
@@ -160,8 +161,8 @@ const CreateGroup = () => {
                             value={size}
                             onChange={(e) => setSize(e.target.value)}
                         >
-                            <option value="lt10">Less than 10 members:</option>
-                            <option value="gt10">Greater than 10 members: </option>
+                            <option value="lt10">Less than 10 members</option>
+                            <option value="gt10">10 or more members</option>
                         </select>
                     </div>
 

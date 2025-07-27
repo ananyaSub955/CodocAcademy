@@ -145,10 +145,13 @@ const JoinGroup = () => {
                     </div>
 
                     {error && (
-                        <ul style={{ color: 'text-warning' }}>
-                            {error.map((msg, idx) => <li key={idx}>{msg}</li>)}
+                        <ul style={{ color: 'text-danger' }}>
+                            {Array.isArray(error)
+                                ? error.map((msg, idx) => <li key={idx}>{msg}</li>)
+                                : <li>{error}</li>}
                         </ul>
                     )}
+
 
 
                     <div className='d-flex justify-content-center py-4'>

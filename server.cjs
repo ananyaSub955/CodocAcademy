@@ -227,6 +227,12 @@ app.post("/joinGroup", async (req, res) => {
             return res.status(400).json({ message: "Invalid group code" });
         }
 
+        if (
+            group.members.length >= 10 &&
+            (group.plan == "group_lt10_yearly" || group.plan == "group_lt10_monthly")) {
+            return res.status(400).json({ message: "Group has exceeded member limit" });
+        }
+
         // Check if user already exists
         const existingUser = await userCollection.findOne({ email });
         if (existingUser) {
@@ -592,9 +598,9 @@ app.get('/user/:id/bookmarks', async (req, res) => {
             _id: b._id,
             name: b.name,
             category: b.category,
-            specialty: b.specialty,      
-            category: b.category,        
-            subCategory: b.subCategory    
+            specialty: b.specialty,
+            category: b.category,
+            subCategory: b.subCategory
         }));
 
         res.json(bookmarks);
@@ -658,9 +664,9 @@ app.get('/user/:id/recentlyViewed', async (req, res) => {
             _id: rv._id,
             name: rv.name,
             category: rv.category,
-            specialty: rv.specialty,      
-            category: rv.category,        
-            subCategory: rv.subCategory  
+            specialty: rv.specialty,
+            category: rv.category,
+            subCategory: rv.subCategory
         }));
 
         res.json(recentlyViewed);
@@ -761,7 +767,7 @@ app.get('/group/:code', async (req, res) => {
         // console.log("Raw group members:", group.members);
 
         // Populate members with user data
-        const memberIds = group.members;  // these are numbers like [7, 12]
+        const memberIds = group.members;
         const members = await userCollection.find({ id: { $in: memberIds } }).toArray();
         //console.log(members);
 
