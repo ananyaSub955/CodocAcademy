@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 const BackButton = ({ text = "Back", link = "/signUpPlans" , marginLeft = '20px'}) => {
     const navigate = useNavigate();
     return (
-        <div className="mb-3">
+        <div className="mb-3 ms-2">
             <button
                 className="btn btn-darkFuschia p-3 mt-4"
                 style={{ marginLeft: marginLeft }}
