@@ -9,9 +9,9 @@ const url = window.location.hostname === "localhost"
 
 const GroupMembers = () => {
   const { groupId } = useParams();
-  //const navigate = useNavigate();
   const [members, setMembers] = useState([]);
   const [groupName, setGroupName] = useState("");
+  const [plan, setGroupPlan] = useState("");
 
   useEffect(() => {
     fetch(`${url}/group/${groupId}`, { credentials: 'include' })
@@ -19,26 +19,52 @@ const GroupMembers = () => {
       .then(data => {
         setGroupName(data.groupName);
         setMembers(data.members || []);
+        setGroupPlan(data.plan);
       })
       .catch(err => console.error("Failed to fetch group", err));
   }, [groupId]);
 
   function toTitleCase(str) {
-        return str
-            .toLowerCase()
-            .split(' ')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(' ');
+    return str
+      .toLowerCase()
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  }
+
+  const renderPlanLabel = () => {
+    switch (plan) {
+      case "group_lt10_yearly":
+        return <h3>Plan: Less than 10 <i>Yearly</i> Group Plan</h3>;
+      case "group_gt10_yearly":
+        return <h3>Plan: 10+ <i>Yearly</i> Group Plan</h3>;
+      case "group_lt10_monthly":
+        return <h3>Plan: Less than 10 <i>Monthly</i> Group Plan</h3>;
+      case "group_gt10_monthly":
+        return <h3>Plan: 10+ <i>Monthly</i> Group Plan</h3>;
+      default:
+        return null;
     }
+  };
+
 
   return (
-    <div className="p-4">
+    <div >
       <BackButton text="Back to all Groups" link='/superAdmin/dashboard' />
-      {/* <h1 className="text-3xl font-bold mb-4">Dashboard</h1> */}
-      <h2 className="fs-1 fw-bold text-center mb-4">{toTitleCase(groupName)}</h2>
-      {members.map(member => (
-        <MemberCard key={member.id} member={member} />
-      ))}
+      <div className="container">
+
+        <div className="p-4">
+          <h2 className="fs-1 fw-bold text-center mb-4">{toTitleCase(groupName)}</h2>
+          {members.map((member, index) => (
+            <MemberCard
+              key={member.id}
+              member={member}
+              className={index % 2 === 0 ? "bg-deepTeal text-white" : "bg-celeste"}
+            />
+          ))}
+          <div className='my-5 border border-black px-2 pt-2'>{renderPlanLabel()}</div>
+        </div>
+      </div>
     </div>
   );
 };

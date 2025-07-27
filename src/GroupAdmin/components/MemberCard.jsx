@@ -10,7 +10,7 @@ const MemberCard = ({ member, onRemove, className = '' }) => {
             .join(' ');
     }
   return (
-    <div className={`d-flex justify-content-between align-items-center px-3 py-2 rounded mb-2 ${className}`}>
+    <div className={`card-style cardHover ${className}`}>
       <span className='fs-4'>{toTitleCase(member.firstName)} {toTitleCase(member.lastName)}</span>
       <button
         className="btn btn-link text-white py-1"

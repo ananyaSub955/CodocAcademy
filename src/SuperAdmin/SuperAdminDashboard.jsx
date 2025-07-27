@@ -17,12 +17,19 @@ const SuperAdminDashboard = () => {
 
 
   return (
-    <div className="p-4">
-      <h1 className="fs-1 font-bold mb-4 text-center fw-bold">Dashboard</h1>
-      <h2 className="fs-2 mb-4">Groups</h2>
-      {groups.map(group => (
-        <GroupCards key={group.id} group={group} />
-      ))}
+    <div className="container mt-4">
+
+      <div className="p-4">
+        <h1 className="fs-1 font-bold mb-4 text-center fw-bold">Dashboard</h1>
+        <h2 className="fs-2 mb-4">Groups</h2>
+        {groups.map((group, index) => (
+          <GroupCards 
+          key={group.id}
+           group={group}
+          className={index % 2 === 0 ? "bg-deepTeal text-white" : "bg-celeste"} 
+           />
+        ))}
+      </div>
     </div>
   );
 };

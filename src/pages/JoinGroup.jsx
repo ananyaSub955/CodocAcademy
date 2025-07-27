@@ -59,7 +59,7 @@ const JoinGroup = () => {
 
     return (
         <div>
-            <BackButton text="Back to Group Choosing" link='/groupSignUpChoice' />
+            <BackButton text="Back to Group Choices" link='/groupSignUpChoice' />
 
             <div className="container mt-4" style={{ maxWidth: '500px' }}>
                 <h1 className="text-darkFuschia p-3 text-center fw-bold">

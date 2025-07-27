@@ -25,6 +25,7 @@ import GroupAdminDashboard from './GroupAdmin/GroupAdminDashboard.jsx';
 import SuperAdminLayout from './SuperAdmin/layout/SuperAdminLayout.jsx';
 import SuperAdminDashboard from './SuperAdmin/SuperAdminDashboard.jsx';
 import GroupMembers from './SuperAdmin/components/GroupMembers.jsx';
+import ContactUs from './pages/ContactUs.jsx';
 
 const App = () => {
   const router = createBrowserRouter(
@@ -42,7 +43,8 @@ const App = () => {
           <Route path='success' element={<PaymentSuccess />} />
           <Route path='subscription' element={<SubscriptionPage />} />
           <Route path='cancel' element={<Cancel />} />
-
+          <Route path ='contact' element={<ContactUs/>} />
+          
           < Route path='*' element={<NotFound />} />
         </Route>
 
@@ -50,13 +52,17 @@ const App = () => {
         <Route path='user' element={<UserLayout />}>
           <Route path='dashboard' element={<UserDashboard />} />
           {/* <Route path='profile' element={<UserProfile />} /> */}
+          <Route path ='contact' element={<ContactUs/>} />
           <Route path=":specialty/info" element={<SpecialtyInfo />} />
-          < Route path='*' element={<NotFound />} />
+
         </Route>
+          < Route path='*' element={<NotFound />} />
 
         {/* Group Admin Layout */}
         <Route path='group' element={<GroupAdminLayout />} >
           <Route path='dashboard' element={<GroupAdminDashboard />} />
+          <Route path ='contact' element={<ContactUs/>} />
+
           < Route path='*' element={<NotFound />} />
         </Route>
 
@@ -64,6 +70,8 @@ const App = () => {
         {/* Super Admin Layout */}
         <Route path='superAdmin' element={<SuperAdminLayout />} >
           <Route path='dashboard' element={<SuperAdminDashboard />} />
+          <Route path ='contact' element={<ContactUs/>} />
+
           <Route path="group/:groupId" element={<GroupMembers />} />
           < Route path='*' element={<NotFound />} />
         </Route>

@@ -16,3 +16,24 @@
   right: 15%;
   transform: rotate(20deg);
 }
+
+.card-style {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  height: 64px; /* consistent height */
+  font-size: 1.25rem; /* equivalent to fs-4 */
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+}
+
+.cardHover {
+  transition: filter 0.2s ease;
+  &:hover {
+    filter: brightness(70%);
+    cursor: pointer;
+  }
+}
+

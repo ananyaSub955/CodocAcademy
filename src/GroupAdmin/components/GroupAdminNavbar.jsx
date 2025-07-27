@@ -27,25 +27,47 @@ const GroupAdminNavbar = () => {
     };
 
     return (
-        <nav className="navbar navbar-expand-sm px-4" id="navbar">
+        <nav className="navbar navbar-expand-lg px-4 mb-2">
             <a className="navbar-brand" href="/group/dashboard">
                 <img src={logo} alt="Codoc Academy Logo" style={{ width: '200px' }} />
             </a>
-            <div className="container-fluid">
 
-                <ul className="navbar-nav ms-auto fs-5">
+            {/* Hamburger Button */}
+            <button
+                className="navbar-toggler"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#navbarUserLinks"
+                aria-controls="navbarUserLinks"
+                aria-expanded="false"
+                aria-label="Toggle navigation"
+            >
+                <span className="navbar-toggler-icon"></span>
+            </button>
+
+            {/* Collapsible Nav */}
+            <div className="collapse navbar-collapse mb-2" id="navbarUserLinks">
+                <ul className="navbar-nav ms-auto fs-5 gap-2">
                     <li className="nav-item">
-                        <button
-                            className="nav-link bg-darkFuschia text-white rounded px-4"
-                            onClick={() => logoutUser()}
-                            >
-                            Logout
-                        </button>
+                        <NavLink className="nav-link rounded px-4 loginHover me-2" to="/group/dashboard">Dashboard</NavLink>
                     </li>
+                    <li className="nav-item">
+                        <NavLink className="nav-link rounded px-4 loginHover me-2" to="/goup/contact">Contact Us</NavLink>
+                    </li>
+                    <li className="nav-item">
+                        <span
+                            className="nav-link rounded px-4 loginHover me-2"
+                            role="button"
+                            onClick={logoutUser}
+                            style={{ cursor: 'pointer' }}
+                        >
+                            Logout
+                        </span>
+                    </li>
+
                 </ul>
             </div>
         </nav>
-    )
-}
-
+    );
+};
 export default GroupAdminNavbar

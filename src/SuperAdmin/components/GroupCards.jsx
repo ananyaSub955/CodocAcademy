@@ -3,11 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 
 
-const GroupCards = ({ group }) => {
+const GroupCards = ({ group, className = '' }) => {
     const navigate = useNavigate();
 
     const handleClick = () => {
-        navigate(`/superAdmin/group/${group.code}`); // use code or id depending on your schema
+        navigate(`/superAdmin/group/${group.code}`); 
     };
 
 
@@ -21,7 +21,7 @@ const GroupCards = ({ group }) => {
 
     return (
         <div
-            className="d-flex justify-content-between align-items-center bg-darkFuschia text-white px-3 py-2 rounded mb-2"
+            className={`card-style cardHover ${className}`}
             onClick={handleClick}
         >
             <span className='fs-4'>{toTitleCase(group.groupName)}</span>

@@ -103,6 +103,7 @@ app.locals.db = database;
 const userCollection = database.collection("Users");
 const specialitiesCollection = database.collection("Specialties");
 const groupCollection = database.collection("Groups");
+const messageCollection = database.collection("Messages");
 //const diabetes = database.collection("Diabetes");
 
 app.post("/login", async (req, res) => {
@@ -809,6 +810,28 @@ app.post('/group/:code/removeMember', async (req, res) => {
         res.json({ message: "Member removed successfully" });
     } catch (err) {
         res.status(500).json({ message: "Error removing member", error: err.message });
+    }
+});
+
+app.post('/contactMessage', async(req, res) =>{
+    
+    try{
+        const {firstName, lastName, email, company, message} = req.body;
+
+        await messageCollection.insertOne({
+            firstName, 
+            lastName, 
+            email, 
+            company, 
+            message,
+            createdAt: new Date()
+        });
+
+        res.status(200).json({ message: "Message submitted successfully!" });
+
+
+    }catch(err){
+        res.status(500).json({ message: "Error submitting message", error: err.message });
     }
 });
 
