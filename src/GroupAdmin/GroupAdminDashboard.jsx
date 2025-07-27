@@ -71,20 +71,27 @@ const GroupAdminDashboard = () => {
           {members.length === 0 ? (
             <p>No members in this group yet.</p>
           ) : (
-            members.map((member) => (
+            members.map((member, index) => (
               <MemberCard
                 key={member._id}
                 member={member}
                 onRemove={removeMember}
-
+                className={index % 2 === 0 ? "bg-deepTeal text-white" : "bg-celeste"} 
               />
             ))
           )}
+
+          {members.length >= 10 && (
+          <p className="text-danger mt-4">
+            You have reached the maximum number of members under your current plan.
+          </p>
+        )}
+
         </>
       )}
 
       <h3 className='my-4 border border-black p-2'> Current Code: <strong>{groupCode}</strong></h3>
-     
+
     </div>
   );
 
