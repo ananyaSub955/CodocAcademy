@@ -12,3 +12,19 @@
   -ms-overflow-style: none; /* IE */
   scrollbar-width: none; /* Firefox */
 }
+
+.cardHover {
+  transition: filter 0.2s ease;
+  &:hover {
+    filter: brightness(90%);
+    cursor: pointer;
+  }
+}
+
+.tagHover {
+  transition: filter 0.2s ease;
+  &:hover {
+    filter: brightness(90%);
+    cursor: pointer;
+  }
+}

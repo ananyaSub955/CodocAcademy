@@ -5,6 +5,7 @@ import { FaBookmark, FaRegBookmark } from "react-icons/fa";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import BackButton from '../components/BackButton';
 
+
 const url = window.location.hostname === "localhost"
   ? "http://localhost:5000"
   : "https://itws-4500-s25-team6.eastus.cloudapp.azure.com/node";
@@ -19,6 +20,12 @@ const SpecialtyInfo = () => {
 
   const [sessionLoading, setSessionLoading] = useState(true);
   const [dataLoading, setDataLoading] = useState(true);
+
+  const [openAccordionKey, setOpenAccordionKey] = useState(null);
+
+  const location = useLocation();
+  const scrollToTopicId = location.state?.scrollToTopicId;
+
 
 
   useEffect(() => {
@@ -87,6 +94,35 @@ const SpecialtyInfo = () => {
       .finally(() => setDataLoading(false));
   }, [specialty, userId]);
 
+  useEffect(() => {
+    if (!structuredData || !scrollToTopicId) return;
+
+    const allItems = Object.values(structuredData).flatMap(subcats =>
+      Object.values(subcats).flat()
+    );
+
+    const targetItem = allItems.find(item => String(item._id).trim() === String(scrollToTopicId).trim());
+
+    if (targetItem) {
+      setSelectedCategory(targetItem.Category);
+
+      const key = Object.entries(structuredData[targetItem.Category] || {}).flatMap(
+        ([_, items], subIdx) =>
+          items.map((it, idx) =>
+            String(it._id) === String(targetItem._id) ? `${subIdx}-${idx}` : null
+          )
+      ).filter(Boolean)[0];
+
+      if (key) setOpenAccordionKey(key);
+
+      setTimeout(() => {
+        const el = document.getElementById(`accordion-${scrollToTopicId}`);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 300);
+    }
+  }, [structuredData, scrollToTopicId]);
+
+
 
   const getFieldValue = (item, target) => {
     const match = Object.keys(item).find(
@@ -96,25 +132,6 @@ const SpecialtyInfo = () => {
   };
 
   const TopicBody = ({ item }) => {
-    // useEffect(() => {
-    //   if (userId && item._id) {
-    //     fetch(`${url}/user/recentlyViewed`, {
-    //       method: "POST",
-    //       headers: { "Content-Type": "application/json" },
-    //       credentials: "include",
-    //       body: JSON.stringify({
-    //         userId,
-    //         topic: {
-    //           _id: item._id,
-    //           SubTopics: item.SubTopics,
-    //           Category: item.Category,
-    //           Subcategory: item.Subcategory
-    //         }
-    //       })
-    //     }).catch(err => console.error("Track view error:", err));
-    //   }
-    // }, []);
-
     return (
       <>
         <p><strong>Clinical Tip:</strong> {getFieldValue(item, "Clinical tip")}</p>
@@ -147,8 +164,12 @@ const SpecialtyInfo = () => {
           action,
           bookmark: {
             _id: itemId,
-            name: item.SubTopics || "Unnamed SubTopic"
+            name: item.SubTopics || "Unnamed SubTopic",
+            specialty: specialty,
+            category: item.Category,
+            subCategory: item.Subcategory
           }
+
         })
       });
 
@@ -157,7 +178,11 @@ const SpecialtyInfo = () => {
       if (result.success) {
         setBookmarkedTopics(prev =>
           action === "add"
-            ? [...prev, { _id: itemId, name: item.SubTopics || "Unnamed SubTopic" }]
+            ? [...prev, {
+              _id: itemId,
+              category: item.Category,
+              name: item.SubTopics || "Unnamed SubTopic"
+            }]
             : prev.filter(b => String(b._id) !== itemId)
         );
       }
@@ -204,54 +229,59 @@ const SpecialtyInfo = () => {
                 {Object.entries(structuredData[selectedCategory]).map(([subcat, items], subIdx) => (
                   <div key={subIdx} className="mb-4">
                     <h5 className="text-ultramarine mb-2">{subcat}</h5>
-                    <Accordion alwaysOpen>
+                    <Accordion activeKey={openAccordionKey} alwaysOpen>
                       {items.map((item, idx) => (
                         <Accordion.Item eventKey={`${subIdx}-${idx}`} key={idx}>
-                          <Accordion.Header
-                            onClick={() => {
-                              if (userId && item._id) {
-                                fetch(`${url}/user/recentlyViewed`, {
-                                  method: "POST",
-                                  headers: { "Content-Type": "application/json" },
-                                  credentials: "include",
-                                  body: JSON.stringify({
-                                    userId,
-                                    topic: {
-                                      _id: item._id,
-                                      SubTopics: item.SubTopics,
-                                      Category: item.Category,
-                                      Subcategory: item.Subcategory
-                                    }
-                                  })
-                                }).catch(err => console.error("Track view error:", err));
-                              }
-                            }}
-                          >
-                            <div className="d-flex justify-content-between align-items-center w-100">
-                              <span>{item.SubTopics || "Unnamed SubTopic"}</span>
-                              <div className="d-flex align-items-center mr-4">
-                                <span
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    toggleBookmark(item);
-                                  }}
-                                  className="cursor-pointer mx-2"
-                                >
-                                  {isBookmarked(item) ? <FaBookmark color="#d10b65" /> : <FaRegBookmark />}
-                                </span>
+                          <div id={`accordion-${item._id}`}>
+                            <Accordion.Header
+                              onClick={() => {
+                                if (userId && item._id) {
+                                  fetch(`${url}/user/recentlyViewed`, {
+                                    method: "POST",
+                                    headers: { "Content-Type": "application/json" },
+                                    credentials: "include",
+                                    body: JSON.stringify({
+                                      userId,
+                                      topic: {
+                                        _id: item._id,
+                                        name: item.SubTopics || "Unnamed SubTopic",
+                                        SubTopics: item.SubTopics,
+                                        specialty: specialty,
+                                        category: item.Category,
+                                        subcategory: item.Subcategory
+                                      }
+                                    })
 
+                                  }).catch(err => console.error("Track view error:", err));
+                                }
+                              }}
+                            >
+                              <div className="d-flex justify-content-between align-items-center w-100">
+                                <span>{item.SubTopics || "Unnamed SubTopic"}</span>
+                                <div className="d-flex align-items-center mr-4">
+                                  <span
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      toggleBookmark(item);
+                                    }}
+                                    className="cursor-pointer mx-2"
+                                  >
+                                    {isBookmarked(item) ? <FaBookmark color="#d10b65" /> : <FaRegBookmark />}
+                                  </span>
+
+
+                                </div>
 
                               </div>
 
-                            </div>
-                          </Accordion.Header>
+                            </Accordion.Header>
 
-                          <Accordion.Body>
-                            {/* <p><strong>Clinical Tip:</strong> {getFieldValue(item, "Explanation/Clinical tip")}</p>
-                            <p><strong>ICD-10:</strong> {getFieldValue(item, "Explanation/ICD 10")}</p>
-                            <p><strong>Documentation Tip:</strong> {getFieldValue(item, "Explanation/Coding/Documentation tip")}</p> */}
-                            <TopicBody item={item} />
-                          </Accordion.Body>
+                            <Accordion.Body>
+
+                              <TopicBody item={item} />
+
+                            </Accordion.Body>
+                          </div>
                         </Accordion.Item>
                       ))}
                     </Accordion>

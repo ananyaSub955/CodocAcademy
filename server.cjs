@@ -588,7 +588,16 @@ app.get('/user/:id/bookmarks', async (req, res) => {
         const user = await userCollection.findOne({ _id: new ObjectId(id) });
         if (!user) return res.status(404).json({ error: "User not found" });
 
-        res.json(user.bookmarks || []);
+        const bookmarks = (user.bookmarks || []).map(b => ({
+            _id: b._id,
+            name: b.name,
+            category: b.category,
+            specialty: b.specialty,      
+            category: b.category,        
+            subCategory: b.subCategory    
+        }));
+
+        res.json(bookmarks);
     } catch (err) {
         console.error("Error fetching user bookmarks", err);
         res.status(500).json({ error: "Server error" });
@@ -643,7 +652,18 @@ app.get('/user/:id/recentlyViewed', async (req, res) => {
 
     try {
         const user = await userCollection.findOne({ _id: new ObjectId(id) });
-        res.json(user.recentlyViewed || []);
+        if (!user) return res.status(404).json({ error: "User not found" });
+
+        const recentlyViewed = (user.recentlyViewed || []).map(rv => ({
+            _id: rv._id,
+            name: rv.name,
+            category: rv.category,
+            specialty: rv.specialty,      
+            category: rv.category,        
+            subCategory: rv.subCategory  
+        }));
+
+        res.json(recentlyViewed);
     } catch (err) {
         res.status(500).json({ error: "Failed to fetch recently viewed" });
     }
