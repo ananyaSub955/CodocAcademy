@@ -29,7 +29,7 @@ const SuperAdminNavbar = () => {
 
     return (
         <nav className="navbar navbar-expand-lg px-4 mb-2">
-            <a className="navbar-brand" href="/user/dashboard">
+            <a className="navbar-brand" href="/superAdmin/dashboard">
                 <img src={logo} alt="Codoc Academy Logo" style={{ width: '200px' }} />
             </a>
 
