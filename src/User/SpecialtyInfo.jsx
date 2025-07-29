@@ -21,7 +21,7 @@ const SpecialtyInfo = () => {
   const [sessionLoading, setSessionLoading] = useState(true);
   const [dataLoading, setDataLoading] = useState(true);
 
-  const [openAccordionKey, setOpenAccordionKey] = useState(null);
+  const [openAccordionKeys, setOpenAccordionKeys] = useState([]);
 
   const location = useLocation();
   const scrollToTopicId = location.state?.scrollToTopicId;
@@ -113,7 +113,7 @@ const SpecialtyInfo = () => {
           )
       ).filter(Boolean)[0];
 
-      if (key) setOpenAccordionKey(key);
+      if (key) setOpenAccordionKeys(key);
 
       setTimeout(() => {
         const el = document.getElementById(`accordion-${scrollToTopicId}`);
@@ -134,8 +134,8 @@ const SpecialtyInfo = () => {
   const TopicBody = ({ item }) => {
     return (
       <>
-        <p><strong>Clinical Tip:</strong> {getFieldValue(item, "Clinical tip")}</p>
         <p><strong>ICD-10:</strong> {getFieldValue(item, "ICD 10")}</p>
+        <p><strong>Clinical Tip:</strong> {getFieldValue(item, "Clinical tip")}</p>
         <p><strong>Coding/Documentation Tip:</strong> {getFieldValue(item, "Coding/Documentation tip")}</p>
       </>
     );
@@ -229,12 +229,20 @@ const SpecialtyInfo = () => {
                 {Object.entries(structuredData[selectedCategory]).map(([subcat, items], subIdx) => (
                   <div key={subIdx} className="mb-4">
                     <h5 className="text-ultramarine mb-2">{subcat}</h5>
-                    <Accordion activeKey={openAccordionKey} alwaysOpen>
+                    <Accordion activeKey={openAccordionKeys} alwaysOpen>
                       {items.map((item, idx) => (
                         <Accordion.Item eventKey={`${subIdx}-${idx}`} key={idx}>
                           <div id={`accordion-${item._id}`}>
                             <Accordion.Header
                               onClick={() => {
+                                const key = `${subIdx}-${idx}`;
+                                setOpenAccordionKeys((prevKeys) =>
+                                  prevKeys.includes(key)
+                                    ? prevKeys.filter((k) => k !== key)
+                                    : [...prevKeys, key]
+                                );
+
+                                // Log view if necessary
                                 if (userId && item._id) {
                                   fetch(`${url}/user/recentlyViewed`, {
                                     method: "POST",
@@ -251,11 +259,11 @@ const SpecialtyInfo = () => {
                                         subcategory: item.Subcategory
                                       }
                                     })
-
                                   }).catch(err => console.error("Track view error:", err));
                                 }
                               }}
                             >
+
                               <div className="d-flex justify-content-between align-items-center w-100">
                                 <span>{item.SubTopics || "Unnamed SubTopic"}</span>
                                 <div className="d-flex align-items-center mr-4">
