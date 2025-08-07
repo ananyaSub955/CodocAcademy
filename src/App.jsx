@@ -11,6 +11,7 @@ import CreateJoinGroup from './pages/CreateJoinGroup.jsx';
 import IndividualSignUp from './pages/IndividualSignUp.jsx';
 import CreateGroup from './pages/CreateGroup.jsx';
 import JoinGroup from './pages/JoinGroup.jsx';
+import TwoFactorSetup from './pages/TwoFactor.jsx';
 import PaymentSuccess from './pages/PaymentSuccess.jsx';
 import SubscriptionPage from './pages/SubscriptionPage.jsx';
 import Cancel from './pages/Cancel.jsx';
@@ -40,6 +41,7 @@ const App = () => {
           <Route path='individualSignUp' element={<IndividualSignUp />} />
           <Route path='createGroup' element={<CreateGroup />} />
           <Route path='joinGroup' element={<JoinGroup />} />
+          <Route path = 'twoFactor'element = {<TwoFactorSetup />}/>
           <Route path='success' element={<PaymentSuccess />} />
           <Route path='subscription' element={<SubscriptionPage />} />
           <Route path='cancel' element={<Cancel />} />
@@ -54,9 +56,9 @@ const App = () => {
           {/* <Route path='profile' element={<UserProfile />} /> */}
           <Route path ='contact' element={<ContactUs/>} />
           <Route path=":specialty/info" element={<SpecialtyInfo />} />
+          < Route path='*' element={<NotFound />} />
 
         </Route>
-          < Route path='*' element={<NotFound />} />
 
         {/* Group Admin Layout */}
         <Route path='group' element={<GroupAdminLayout />} >

@@ -11,6 +11,10 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [requires2FA, setRequires2FA] = useState(false);
+  const [tempUserId, setTempUserId] = useState(null);
+  const [token, setToken] = useState('');
+
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -25,25 +29,62 @@ const Login = () => {
 
       const data = await response.json();
 
-      if (response.ok && data.success) {
-        const { individualUser, inGroup, groupLeader, superAdmin } = data;
-
-        if (groupLeader) {
-          navigate('/group/dashboard');
-        } else if (individualUser || inGroup) {
-          navigate('/user/dashboard');
-        } else if (superAdmin) {
-          navigate('/superAdmin/dashboard'); 
-        } else {
-          setError("Unauthorized login");
-        }
+      if (data.requires2FA) {
+        setRequires2FA(true);
+        setTempUserId(data.tempUserId);
+        return;
       }
 
+      if (response.ok && data.success) {
+        redirectToDashboard(data);
+      } else {
+        setError("Unauthorized login");
+      }
     } catch (err) {
       console.error(err);
       setError('Something went wrong. Try again.');
     }
   };
+
+  const handle2FAVerify = async () => {
+    try {
+      const res = await fetch(`${url}/verifyToken`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ token, tempUserId })
+      });
+
+      const data = await res.json();
+
+      if (data.verified) {
+        // you may want to re-fetch session or redirect
+        const roleResponse = await fetch(`${url}/session`, { credentials: "include" });
+        const user = await roleResponse.json();
+        redirectToDashboard(user);
+      } else {
+        setError("Invalid token. Try again.");
+      }
+    } catch (err) {
+      setError("2FA verification failed.");
+      console.error(err);
+    }
+  };
+
+  const redirectToDashboard = ({ individualUser, inGroup, groupLeader, superAdmin }) => {
+    if (groupLeader) {
+      navigate('/group/dashboard');
+    } else if (individualUser || inGroup) {
+      navigate('/user/dashboard');
+    } else if (superAdmin) {
+      navigate('/superAdmin/dashboard');
+    } else {
+      setError("No role assigned.");
+    }
+  };
+
+
+
 
 
   return (
@@ -76,19 +117,26 @@ const Login = () => {
             required
           />
         </div>
-        {/* <div className="form-check mb-3">
-          <input
-            className="form-check-input"
-            type="checkbox"
-            id="remember"
-            name="remember"
-          />
-          <label className="form-check-label" htmlFor="remember">
-            Remember me
-          </label>
-        </div> */}
 
         {error && <p className="text-warning">{error}</p>}
+
+        {requires2FA && (
+          <div className="mb-3">
+            <label htmlFor="token" className="form-label"><b>2FA Code:</b></label>
+            <input
+              type="text"
+              className="bg-lightBlue form-control"
+              id="token"
+              placeholder="Enter 6-digit code"
+              value={token}
+              onChange={(e) => setToken(e.target.value)}
+            />
+            <button type="button" className="btn btn-darkFuschia mt-2" onClick={handle2FAVerify}>
+              Verify 2FA
+            </button>
+          </div>
+        )}
+
 
         <button type="submit" className="btn btn-darkFuschia">
           Login
@@ -105,8 +153,6 @@ const Login = () => {
         </p>
 
       </form>
-
-
 
     </div>
   );
