@@ -1,11 +1,16 @@
 const express = require('express');
 const cors = require('cors');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const bodyParser = require('body-parser');
+const speakeasy = require('speakeasy');
+const QRCode = require('qrcode');
 require('dotenv').config({ path: 'config.env' });
 
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 const app = express();
+app.use(bodyParser.json());
+
 const PORT = 5000;
 
 //app.use(cors()); // Allow requests from frontend
@@ -89,13 +94,52 @@ app.get('/session', async (req, res) => {
             id: user._id.toString(),
             firstName: user.firstName,
             bookmarks: user.bookmarks || [],
-            code: user.code
+            code: user.code,
+            individualUser: user.individualUser || false,
+            inGroup: user.inGroup || false,
+            groupLeader: user.groupLeader || false,
+            superAdmin: user.superAdmin || false
         });
+
     } catch (err) {
         console.error('Session fetch failed:', err);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
+app.get('/generate', (req, res) => {
+    const secret = speakeasy.generateSecret({ length: 20 });
+    QRCode.toDataURL(secret.otpauth_url, (err, dataUrl) => {
+        if (err) return res.status(500).send('Error generating QR code');
+
+        res.json({
+            secret: secret.base32,
+            qr: dataUrl
+        });
+    });
+});
+
+app.post('/verify', (req, res) => {
+    const { token, secret } = req.body;
+    const verified = speakeasy.totp.verify({
+        secret,
+        encoding: 'base32',
+        token,
+        window: 1
+    });
+
+    res.json({ verified });
+});
+
+function getTwoFA(isSuperAdmin = false) {
+    if (isSuperAdmin) return undefined;
+
+    const secret = speakeasy.generateSecret({ length: 20 });
+    return {
+        enabled: true,
+        secret: secret.base32,
+    };
+}
 
 
 const database = client.db("CodocAcademy");
@@ -111,38 +155,37 @@ app.post("/login", async (req, res) => {
 
     try {
         const user = await userCollection.findOne({ email });
-
-        if (!user) {
-            return res.status(400).json({ message: "User not found" });
-        }
+        if (!user) return res.status(400).json({ message: "User not found" });
 
         const match = await bcrypt.compare(password, user.password);
+        if (!match) return res.status(401).json({ message: "Invalid login" });
 
-        if (match) {
-            req.session.user = {
-                id: user._id,
-                email: user.email,
-                firstName: user.firstName
-            };
-
-            req.session.userId = user._id.toString();
-
+        if (user.twoFA?.enabled) {
             return res.status(200).json({
-                success: true,
+                requires2FA: true,
+                tempUserId: user._id,
                 individualUser: user.individualUser || false,
                 inGroup: user.inGroup || false,
                 groupLeader: user.groupLeader || false,
                 superAdmin: user.superAdmin || false
             });
-        } else {
-            return res.status(401).json({ message: "Invalid login" });
         }
+
+        req.session.userId = user._id.toString();
+        res.status(200).json({
+            success: true,
+            individualUser: user.individualUser || false,
+            inGroup: user.inGroup || false,
+            groupLeader: user.groupLeader || false,
+            superAdmin: user.superAdmin || false
+        });
 
     } catch (error) {
         console.error("Login error:", error);
         res.status(500).json({ message: "Internal server error" });
     }
 });
+
 
 app.post("/individualSignup", async (req, res) => {
 
@@ -247,6 +290,8 @@ app.post("/joinGroup", async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         // Create new user
+        const twoFASecret = speakeasy.generateSecret({ length: 20 });
+
         const newUser = await userCollection.insertOne({
             id: newId,
             firstName,
@@ -258,8 +303,13 @@ app.post("/joinGroup", async (req, res) => {
             individualUser: false,
             superAdmin: false,
             bookmarks: [],
-            recientlyViewed: []
+            recientlyViewed: [],
+            twoFA: {
+                enabled: true,
+                secret: twoFASecret.base32
+            }
         });
+
 
         await groupCollection.updateOne(
             { code: code },
@@ -425,6 +475,8 @@ app.post("/finalizeSignup", async (req, res) => {
     const hashedPassword = await bcrypt.hash(formData.password, 10);
 
     if (type === "individual") {
+        const twoFA = getTwoFA(false);
+
         await userCollection.insertOne({
             ...formData,
             password: hashedPassword,
@@ -436,6 +488,7 @@ app.post("/finalizeSignup", async (req, res) => {
             superAdmin: false,
             bookmarks: [],
             recentlyViewed: [],
+            ...(twoFA && { twoFA }), // only add if not undefined
         });
 
         const user = await userCollection.findOne({ email: formData.email });
@@ -463,6 +516,8 @@ app.post("/finalizeSignup", async (req, res) => {
             plan,
         });
 
+        const twoFA = getTwoFA(false);
+
         await userCollection.insertOne({
             email: formData.email,
             password: hashedPassword,
@@ -475,7 +530,9 @@ app.post("/finalizeSignup", async (req, res) => {
             code: formData.code,
             hasPaid: true,
             plan,
+            ...(twoFA && { twoFA }),
         });
+
 
         const user = await userCollection.findOne({ email: formData.email });
 
@@ -501,8 +558,54 @@ app.post("/finalizeSignup", async (req, res) => {
 
 });
 
+app.get('/get2FA', async (req, res) => {
+    if (!req.session.userId) return res.status(401).json({ message: "Unauthorized" });
+
+    const user = await userCollection.findOne({ _id: new ObjectId(req.session.userId) });
+    if (!user || !user.twoFA?.enabled) return res.status(400).json({ message: "2FA not set up" });
+
+    const secret = user.twoFA.secret;
+
+    const otpauthUrl = `otpauth://totp/CodocAcademy:${user.email}?secret=${secret}&issuer=CodocAcademy`;
+
+    QRCode.toDataURL(otpauthUrl, (err, qrCodeDataUrl) => {
+        if (err) {
+            return res.status(500).json({ message: "Failed to generate QR code" });
+        }
+
+        res.json({
+            qrCode: qrCodeDataUrl,
+            secret,
+        });
+    });
+});
+
+app.post('/verifyToken', async (req, res) => {
+    const { token, tempUserId } = req.body;
+
+    if (!tempUserId) return res.status(401).json({ verified: false });
+
+    const user = await userCollection.findOne({ _id: new ObjectId(tempUserId) });
+    if (!user || !user.twoFA?.enabled) return res.status(400).json({ verified: false });
+
+    const verified = speakeasy.totp.verify({
+        secret: user.twoFA.secret,
+        encoding: 'base32',
+        token,
+        window: 1
+    });
+
+    if (verified) {
+        req.session.userId = user._id.toString(); // ✅ Set session
+        return res.json({ verified: true });
+    }
+
+    res.json({ verified: false });
+});
+
+
 app.get("/specialties", async (req, res) => {
-    if (!req.session.user) {
+    if (!req.session.userId) {
         return res.status(401).json({ message: "Not logged in" });
     }
     try {
@@ -522,7 +625,7 @@ app.get("/specialties", async (req, res) => {
 app.post("/:speciality/info", async (req, res) => {
     //console.log("Specialty POST Request:", req.body);
 
-    if (!req.session.user) {
+    if (!req.session.userId) {
         return res.status(401).json({ message: "Not logged in" });
     }
 
@@ -813,16 +916,16 @@ app.post('/group/:code/removeMember', async (req, res) => {
     }
 });
 
-app.post('/contactMessage', async(req, res) =>{
-    
-    try{
-        const {firstName, lastName, email, company, message} = req.body;
+app.post('/contactMessage', async (req, res) => {
+
+    try {
+        const { firstName, lastName, email, company, message } = req.body;
 
         await messageCollection.insertOne({
-            firstName, 
-            lastName, 
-            email, 
-            company, 
+            firstName,
+            lastName,
+            email,
+            company,
             message,
             createdAt: new Date()
         });
@@ -830,7 +933,7 @@ app.post('/contactMessage', async(req, res) =>{
         res.status(200).json({ message: "Message submitted successfully!" });
 
 
-    }catch(err){
+    } catch (err) {
         res.status(500).json({ message: "Error submitting message", error: err.message });
     }
 });

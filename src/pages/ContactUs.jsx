@@ -36,6 +36,11 @@ const ContactUs = () => {
             //const data = await response.json();
 
             setSuccess(true);
+            
+            setFirstName('');
+            setLastName('');
+            setEmail('');
+            setCompany('');
             setMessage('');
 
         } catch (err) {
