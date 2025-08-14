@@ -46,14 +46,22 @@ async function connectToMongoDB() {
 }
 connectToMongoDB();
 
-// const windowUrl = window.location.hostname === "localhost"
-//   ? "http://localhost:5173"
-//   : "https://itws-4500-s25-team6.eastus.cloudapp.azure.com/node";
+const allowedOrigins = [
+    'http://localhost:5173',
+    'https://ananya.honor-itsolutions.com/'
+];
 
 app.use(cors({
-    origin: 'http://localhost:5173', // deployed frontend URL
-    credentials: true,
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true
 }));
+
 
 // SESSION SET UP 
 app.use(
