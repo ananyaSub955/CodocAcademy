@@ -4,7 +4,7 @@ import graphic1 from '../assets/graphic1.png';
 
 const url = window.location.hostname === "localhost"
   ? "http://localhost:5000"
-  : "https://ananya.honor-itsolutions.com/";
+  : "https://ananya.honor-itsolutions.com";
 
 const PaymentSuccess = () => {
   const navigate = useNavigate();

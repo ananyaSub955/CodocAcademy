@@ -3,7 +3,7 @@ import { MdLocationOn, MdPhone, MdEmail } from "react-icons/md";
 
 const url = window.location.hostname === "localhost"
     ? "http://localhost:5000"
-    : "https://ananya.honor-itsolutions.com/";
+    : "https://ananya.honor-itsolutions.com";
 
 
 
