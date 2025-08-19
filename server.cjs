@@ -26,6 +26,20 @@ const { data } = require('react-router-dom');
 const uri = process.env.MONGOURL;
 const baseUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
 
+function getClientOrigin(req) {
+    // Prefer the browser's Origin header if it's one of your allowed origins
+    const origin = req.headers.origin;
+    if (origin && ['http://localhost:5173', 'https://ananya.honor-itsolutions.com'].includes(origin)) {
+        return origin;
+    }
+    // Fallback to environment or localhost
+    return process.env.FRONTEND_URL || 'http://localhost:5173';
+}
+
+function joinUrl(root, path) {
+    return `${String(root).replace(/\/+$/, '')}/${String(path).replace(/^\/+/, '')}`;
+}
+
 
 const client = new MongoClient(uri, {
     serverApi: {
@@ -48,7 +62,7 @@ connectToMongoDB();
 
 const allowedOrigins = [
     'http://localhost:5173',
-    'https://ananya.honor-itsolutions.com/'
+    'https://ananya.honor-itsolutions.com'
 ];
 
 app.use(cors({
@@ -254,13 +268,26 @@ app.post("/individualSignup", async (req, res) => {
             ? 'price_1RnTtaFa5BATz5g02VLVxJyI'
             : 'price_1Rlr0eFa5BATz5g0m33bFvi8';
 
+        // const session = await stripe.checkout.sessions.create({
+        //     mode: 'subscription',
+        //     payment_method_types: ['card'],
+        //     customer_email: email,
+        //     line_items: [{ price: priceId, quantity: 1 }],
+        //     success_url: `${baseUrl}/success`,
+        //     cancel_url: `${baseUrl}/cancel`,
+        // });
+
+        const origin = getClientOrigin(req);
+        const successUrl = joinUrl(origin, '/success');
+        const cancelUrl = joinUrl(origin, '/cancel');
+
         const session = await stripe.checkout.sessions.create({
             mode: 'subscription',
             payment_method_types: ['card'],
             customer_email: email,
             line_items: [{ price: priceId, quantity: 1 }],
-            success_url: `${baseUrl}/success`,
-            cancel_url: `${baseUrl}/cancel`,
+            success_url: successUrl,
+            cancel_url: cancelUrl,
         });
 
         res.json({ url: session.url });
@@ -422,13 +449,26 @@ app.post("/createGroup", async (req, res) => {
             size: groupSize
         };
 
+        // const session = await stripe.checkout.sessions.create({
+        //     mode: 'subscription',
+        //     payment_method_types: ['card'],
+        //     customer_email: email,
+        //     line_items: [{ price: priceId, quantity: 1 }],
+        //     success_url: `${baseUrl}/success`,
+        //     cancel_url: `${baseUrl}/cancel`,
+        // });
+
+        const origin = getClientOrigin(req);
+        const successUrl = joinUrl(origin, '/success');
+        const cancelUrl = joinUrl(origin, '/cancel');
+
         const session = await stripe.checkout.sessions.create({
             mode: 'subscription',
             payment_method_types: ['card'],
             customer_email: email,
             line_items: [{ price: priceId, quantity: 1 }],
-            success_url: `${baseUrl}/success`,
-            cancel_url: `${baseUrl}/cancel`,
+            success_url: successUrl,
+            cancel_url: cancelUrl,
         });
 
         res.json({ url: session.url });
