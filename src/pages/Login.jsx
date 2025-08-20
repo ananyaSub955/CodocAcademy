@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router-dom';
 
 const url = window.location.hostname === "localhost"
   ? "http://localhost:5000"
-  : "https://ananya.honor-itsolutions.com";
+  : "/api";
+  // : "https://ananya.honor-itsolutions.com";
+
 
 const Login = () => {
 
