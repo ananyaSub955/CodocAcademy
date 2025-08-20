@@ -79,6 +79,8 @@ app.use(cors({
     credentials: true
 }));
 
+app.set('trust proxy', 1);
+
 
 // SESSION SET UP 
 app.use(
@@ -98,6 +100,7 @@ app.use(
         },
     })
 );
+
 
 app.get('/session', async (req, res) => {
     //console.log("Incoming session:", req.session); // ✅ debug
@@ -1103,6 +1106,8 @@ app.get('/search', async (req, res) => {
 });
 
 
+
+app.get('/health', (_req, res) => res.send("ok"));
 
 //LOGOUT ROUTE
 app.get("/logout", (req, res) => {
