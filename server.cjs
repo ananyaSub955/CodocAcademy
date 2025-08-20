@@ -76,6 +76,8 @@ app.use(cors({
     credentials: true
 }));
 
+app.set('trust proxy', 1);
+
 
 // SESSION SET UP 
 app.use(
@@ -95,6 +97,7 @@ app.use(
         },
     })
 );
+
 
 app.get('/session', async (req, res) => {
     //console.log("Incoming session:", req.session); // ✅ debug
