@@ -93,9 +93,10 @@ const UserDashboard = () => {
             });
 
             if (!response.ok) throw new Error("Failed to fetch specialty info");
+            
 
             const data = await response.json();
-            navigate(`/user/${specialtyName}/info`, {
+            navigate(`/user/${encodeURIComponent(specialtyName)}/info`, {
                 state: {
                     userId: userId.id,
                     userBookmarks: bookmarks,
