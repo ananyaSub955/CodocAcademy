@@ -170,7 +170,7 @@ const userCollection = database.collection("Users");
 const specialitiesCollection = database.collection("Specialties");
 const groupCollection = database.collection("Groups");
 const messageCollection = database.collection("Messages");
-//const diabetes = database.collection("Diabetes");
+const diabetesCollection = database.collection("Diabetes");
 
 app.post("/login", async (req, res) => {
     const { email, password } = req.body;
@@ -985,6 +985,26 @@ app.post('/contactMessage', async (req, res) => {
         res.status(500).json({ message: "Error submitting message", error: err.message });
     }
 });
+
+// app.get('/search', async(req, res) => {
+
+//     const searchQuery = req.query.query as String
+
+//     const result = await diabetesCollection.find({
+//         $text: {
+//             $search : searchQuery, 
+//             $caseSensitive: false,
+//             $diacriticSensitive: false
+//         },
+//     })
+//     .project({$score: {$meta: 'textScore' }, _id: 0})
+//     .sort 
+
+//     const array = result.toArray()
+
+//     res.json(array)
+
+// });
 
 //LOGOUT ROUTE
 app.get("/logout", (req, res) => {
