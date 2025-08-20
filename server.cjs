@@ -1006,6 +1006,8 @@ app.post('/contactMessage', async (req, res) => {
 
 // });
 
+app.get('/health', (_req, res) => res.send("ok"));
+
 //LOGOUT ROUTE
 app.get("/logout", (req, res) => {
     req.session.destroy(err => {
