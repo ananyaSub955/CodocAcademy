@@ -49,11 +49,14 @@ const client = new MongoClient(uri, {
     }
 });
 
+const searchClient = new MongoClient(uri);
 
 async function connectToMongoDB() {
     try {
         await client.connect();
         console.log('Connected to MongoDB');
+        await searchClient.connect();
+        console.log('Connected non-strict client for Atlas Search');
     } catch (err) {
         console.error(err);
     }
@@ -171,6 +174,56 @@ const specialitiesCollection = database.collection("Specialties");
 const groupCollection = database.collection("Groups");
 const messageCollection = database.collection("Messages");
 const diabetesCollection = database.collection("Diabetes");
+
+const searchDb = searchClient.db("CodocAcademy");
+const diabetesSearchCollection = searchDb.collection("Diabetes");
+
+// (async () => {
+//     try {
+//         // Use a separate, non-strict client ONLY to create the index
+//         const adminClient = new MongoClient(uri); // no serverApi.strict
+//         await adminClient.connect();
+
+//         const adminDb = adminClient.db("CodocAcademy");
+//         const adminDiabetes = adminDb.collection("Diabetes");
+
+//         // Optional: drop any existing text indexes except our target
+//         const existing = await adminDiabetes.indexes();
+//         for (const idx of existing) {
+//             if (idx.name !== "search_text" && idx.key && idx.key._fts === "text") {
+//                 try { await adminDiabetes.dropIndex(idx.name); } catch { }
+//             }
+//         }
+
+//         // Create the single compound text index (runs once)
+//         const hasSearch = existing.some(i => i.name === "search_text");
+//         if (!hasSearch) {
+//             await adminDiabetes.createIndex(
+//                 {
+//                     Category: "text",
+//                     Subcategory: "text",
+//                     SubTopics: "text",
+//                     Headers: "text",
+//                     Explanation: "text",
+//                     "ICD 10": "text",
+//                     "Coding/Documentation tip": "text",
+//                 },
+//                 {
+//                     name: "search_text",
+//                     weights: { Explanation: 10, Headers: 5 },
+//                     default_language: "none",
+//                 }
+//             );
+//             console.log("Created text index: search_text");
+//         }
+
+//         await adminClient.close();
+//     } catch (e) {
+//         console.error("Index setup failed:", e);
+//     }
+// })();
+
+
 
 app.post("/login", async (req, res) => {
     const { email, password } = req.body;
@@ -685,7 +738,9 @@ app.post("/:speciality/info", async (req, res) => {
     }
 
     try {
-        const allowedSpecialties = ["diabetes", "vascular", "cardiology", "renal", "neurology"];
+        const allowedSpecialties = ["diabetes", "vascular", "cardiology", "renal", "neurology", "connective tissue disorder",
+            "miscellaneous", "gastroentrology", "sud and behaviorial sciences"
+        ];
         if (!allowedSpecialties.includes(speciality.toLowerCase())) {
             return res.status(404).json({ error: "Specialty not found" });
         }
@@ -986,25 +1041,68 @@ app.post('/contactMessage', async (req, res) => {
     }
 });
 
-// app.get('/search', async(req, res) => {
+app.get('/search', async (req, res) => {
+    try {
+        const q = String(req.query.query || '').trim();
+        if (!q) return res.json([]);
 
-//     const searchQuery = req.query.query as String
+        const limit = Math.min(parseInt(req.query.limit || '10', 10) || 10, 25);
 
-//     const result = await diabetesCollection.find({
-//         $text: {
-//             $search : searchQuery, 
-//             $caseSensitive: false,
-//             $diacriticSensitive: false
-//         },
-//     })
-//     .project({$score: {$meta: 'textScore' }, _id: 0})
-//     .sort 
+        const pipeline = [
+            {
+                $search: {
+                    index: 'diabetes_search',
+                    text: {
+                        query: q,
+                        path: { wildcard: '*' },   // <- search all indexed string fields
+                        fuzzy: { maxEdits: 1, prefixLength: 2 }
+                    }
+                }
+            },
+            { $limit: limit },
+            {
+                $project: {
+                    _id: 1,                      // keep _id so we can inspect
+                    score: { $meta: 'searchScore' },
+                    Category: 1,
+                    Subcategory: 1,
+                    SubTopics: 1,
+                    Headers: 1,
+                    Explanation: 1,
+                    'ICD 10': 1,
+                    'Coding/Documentation tip': 1
+                }
+            }
+        ];
 
-//     const array = result.toArray()
+        const docs = await diabetesSearchCollection.aggregate(pipeline).toArray();
+        if (docs.length === 0) {
+            const fallback = await diabetesCollection.find({
+                $or: [
+                    { Explanation: { $regex: q, $options: 'i' } },
+                    { Headers: { $regex: q, $options: 'i' } },
+                    { SubTopics: { $regex: q, $options: 'i' } },
+                    { Subcategory: { $regex: q, $options: 'i' } },
+                    { Category: { $regex: q, $options: 'i' } },
+                    { 'ICD 10': { $regex: q, $options: 'i' } },
+                    { 'Coding/Documentation tip': { $regex: q, $options: 'i' } }
+                ]
+            })
+                .limit(10)
+                .project({ _id: 1, Category: 1, Subcategory: 1, SubTopics: 1, Headers: 1, Explanation: 1, 'ICD 10': 1, 'Coding/Documentation tip': 1 })
+                .toArray();
 
-//     res.json(array)
+            return res.json(fallback);
+        }
 
-// });
+        res.json(docs);
+    } catch (err) {
+        console.error('Atlas Search error:', err);
+        res.status(500).json({ message: 'Error with search', error: err.message });
+    }
+});
+
+
 
 //LOGOUT ROUTE
 app.get("/logout", (req, res) => {
