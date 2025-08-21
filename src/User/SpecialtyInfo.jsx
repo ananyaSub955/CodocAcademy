@@ -8,7 +8,7 @@ import BackButton from '../components/BackButton';
 
 const url = window.location.hostname === "localhost"
   ? "http://localhost:5000"
-  : "https://ananya.honor-itsolutions.com";
+  : "https://ananya.honor-itsolutions.com/node";
 
 const SpecialtyInfo = () => {
   const { specialty } = useParams();

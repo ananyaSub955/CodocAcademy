@@ -65,7 +65,7 @@ connectToMongoDB();
 
 const allowedOrigins = [
     'http://localhost:5173',
-    'https://ananya.honor-itsolutions.com'
+    'https://ananya.honor-itsolutions.com/node'
 ];
 
 app.use(cors({

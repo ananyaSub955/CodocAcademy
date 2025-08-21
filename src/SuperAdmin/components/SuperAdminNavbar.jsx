@@ -5,7 +5,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 
 const url = window.location.hostname === "localhost"
     ? "http://localhost:5000"
-    : "https://ananya.honor-itsolutions.com";
+    : "https://ananya.honor-itsolutions.com/node";
 
 const SuperAdminNavbar = () => {
     const navigate = useNavigate();
