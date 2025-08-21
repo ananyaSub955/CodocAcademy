@@ -7,7 +7,7 @@ import { validatePassword } from '../components/ValidatePassword';
 
 const url = window.location.hostname === "localhost"
     ? "http://localhost:5000"
-    : "https://ananya.honor-itsolutions.com";
+    : "https://ananya.honor-itsolutions.com/node";
 
 const JoinGroup = () => {
     const navigate = useNavigate();
