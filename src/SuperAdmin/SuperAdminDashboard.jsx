@@ -3,7 +3,7 @@ import GroupCards from './components/GroupCards';
 
 const url = window.location.hostname === "localhost"
   ? "http://localhost:5000"
-  : "https://ananya.honor-itsolutions.com/node";
+  : "https://ananya.honor-itsolutions.com";
 
 const SuperAdminDashboard = () => {
   const [groups, setGroups] = useState([]);
