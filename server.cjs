@@ -1054,28 +1054,23 @@ app.get('/search', async (req, res) => {
         const pipeline = [
             {
                 $search: {
-                    index: 'diabetes_search',
+                    index: 'default',
                     text: {
                         query: q,
-                        path: { wildcard: '*' },   // <- search all indexed string fields
+                        path: { wildcard: '*' },
                         fuzzy: { maxEdits: 1, prefixLength: 2 }
                     }
                 }
             },
-            { $limit: limit },
             {
                 $project: {
-                    _id: 1,                      // keep _id so we can inspect
                     score: { $meta: 'searchScore' },
-                    Category: 1,
-                    Subcategory: 1,
-                    SubTopics: 1,
-                    Headers: 1,
-                    Explanation: 1,
-                    'ICD 10': 1,
-                    'Coding/Documentation tip': 1
+                    highlights: { $meta: 'searchHighlights' },
+                    Category: 1, Subcategory: 1, SubTopics: 1,
+                    Headers: 1, Explanation: 1, 'ICD 10': 1, 'Coding/Documentation tip': 1
                 }
-            }
+            },
+            { $limit: limit }
         ];
 
         const docs = await diabetesSearchCollection.aggregate(pipeline).toArray();
@@ -1092,7 +1087,16 @@ app.get('/search', async (req, res) => {
                 ]
             })
                 .limit(10)
-                .project({ _id: 1, Category: 1, Subcategory: 1, SubTopics: 1, Headers: 1, Explanation: 1, 'ICD 10': 1, 'Coding/Documentation tip': 1 })
+                .project({
+                    _id: 1,
+                    Category: { $ifNull: ["$Category", "$Category ", " $Category"] },
+                    Subcategory: { $ifNull: ["$Subcategory", "$Subcategory ", " $Subcategory"] },
+                    SubTopics: { $ifNull: ["$SubTopics", "$SubTopics ", " $SubTopics"] },
+                    Headers: { $ifNull: ["$Headers", "$Headers ", " $Headers"] },
+                    Explanation: { $ifNull: ["$Explanation", "$Explanation ", " $Explanation"] },
+                    "ICD 10": { $ifNull: ["$ICD 10", "$ICD 10 ", " $ICD 10"] },
+                    "Coding/Documentation tip": { $ifNull: ["$Coding/Documentation tip", "$Coding/Documentation tip ", " $Coding/Documentation tip"] }
+                })
                 .toArray();
 
             return res.json(fallback);
