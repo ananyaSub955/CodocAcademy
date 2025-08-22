@@ -97,9 +97,6 @@ app.use(
         }),
         cookie: {
             sameSite: 'lax',
-            // secure: process.env.NODE_ENV === 'production', // true on prod HTTPS
-            //  path: '/',                // default path
-            // domain: 'ananya.honor-itsolutions.com',
             secure: false,
             httpOnly: true,
         },
@@ -108,11 +105,11 @@ app.use(
 
 
 app.get('/session', async (req, res) => {
-    console.log("Incoming session:", req.session); // ✅ debug
+    //console.log("Incoming session:", req.session); // ✅ debug
 
+    if (!req.session.userId) return res.json({});
 
-    const userId = req.session?.userId;
-    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const userId = req.session.userId;
 
     if (!ObjectId.isValid(userId)) {
         return res.status(400).json({ error: 'Invalid user ID' });
@@ -312,15 +309,7 @@ app.post("/individualSignup", async (req, res) => {
             cancel_url: cancelUrl,
         });
 
-        // res.json({ url: session.url });
-
-        req.session.save(err => {
-            if (err) {
-                console.error('session save error', err);
-                return res.status(500).json({ message: "Could not persist session" });
-            }
-            res.json({ url: session.url });
-        });
+        res.json({ url: session.url });
     } catch (error) {
         res.status(500).json({ message: "Error signing up", error: error.message });
     }
@@ -501,15 +490,7 @@ app.post("/createGroup", async (req, res) => {
             cancel_url: cancelUrl,
         });
 
-        // res.json({ url: session.url });
-
-        req.session.save(err => {
-            if (err) {
-                console.error('session save error', err);
-                return res.status(500).json({ message: "Could not persist session" });
-            }
-            res.json({ url: session.url });
-        });
+        res.json({ url: session.url });
 
 
     } catch (error) {
@@ -532,6 +513,7 @@ app.get("/generateGroupCode", async (req, res) => {
     const code = await generateCode();
     res.json({ code });
 });
+
 
 
 app.post("/finalizeSignup", async (req, res) => {
@@ -643,143 +625,6 @@ app.post("/finalizeSignup", async (req, res) => {
 
 });
 
-
-// app.post("/finalizeSignup", async (req, res) => {
-//     try {
-//         const signup = req.session.pendingSignup;
-//         if (!signup) return res.status(400).json({ message: "No pending signup" });
-
-//         const { type, frequency, size, formData } = signup;
-//         const plan = type === "group" ? `group_${size}_${frequency}` : `individual_${frequency}`;
-
-//         if (formData.code) {
-//             const existingGroup = await groupCollection.findOne({ code: formData.code });
-//             if (existingGroup) return res.status(400).json({ message: "Code already in use" });
-//         }
-
-//         const existingUser = await userCollection.findOne({ email: formData.email });
-//         if (existingUser) return res.status(400).json({ message: "Email already used as user" });
-
-//         const hashedPassword = await bcrypt.hash(formData.password, 10);
-
-//         if (type === "individual") {
-//             const twoFA = buildTwoFA(false); // disabled until verified
-
-//             await userCollection.insertOne({
-//                 ...formData,
-//                 password: hashedPassword,
-//                 hasPaid: true,
-//                 plan,
-//                 inGroup: false,
-//                 groupLeader: false,
-//                 individualUser: true,
-//                 superAdmin: false,
-//                 bookmarks: [],
-//                 recentlyViewed: [],
-//                 twoFA, // always present (enabled: false)
-//             });
-
-//             const user = await userCollection.findOne({ email: formData.email });
-
-//             req.session.user = {
-//                 id: user._id,
-//                 email: user.email,
-//                 firstName: user.firstName,
-//                 code: user.code,
-//                 groupLeader: false,
-//                 inGroup: false,
-//                 individualUser: true,
-//                 superAdmin: false,
-//             };
-//             req.session.userId = user._id.toString();
-//         } else {
-//             // GROUP
-//             await groupCollection.insertOne({
-//                 groupName: formData.groupName,
-//                 email: formData.email,
-//                 password: hashedPassword,
-//                 code: formData.code,
-//                 members: [], // optionally add the admin later
-//                 hasPaid: true,
-//                 plan,
-//             });
-
-//             const twoFA = buildTwoFA(false); // disabled until verified
-
-//             await userCollection.insertOne({
-//                 email: formData.email,
-//                 password: hashedPassword,
-//                 firstName: formData.groupName,
-//                 lastName: "Admin",
-//                 inGroup: true,
-//                 groupLeader: true,
-//                 individualUser: false,
-//                 superAdmin: false,
-//                 code: formData.code,
-//                 hasPaid: true,
-//                 plan,
-//                 twoFA,
-//             });
-
-//             const user = await userCollection.findOne({ email: formData.email });
-
-//             req.session.user = {
-//                 id: user._id,
-//                 email: user.email,
-//                 firstName: user.firstName,
-//                 code: user.code,
-//                 groupLeader: true,
-//                 inGroup: true,
-//                 individualUser: false,
-//                 superAdmin: false,
-//             };
-//             req.session.userId = user._id.toString();
-//         }
-
-//         delete req.session.pendingSignup;
-//         res.json({ success: true, groupLeader: type === "group" });
-//     } catch (err) {
-//         console.error("finalizeSignup error:", err);
-//         res.status(500).json({ message: "Finalize signup failed", error: err.message });
-//     }
-// });
-
-// app.get('/get2FA', async (req, res) => {
-//     try {
-//         if (!req.session.userId) return res.status(401).json({ message: "Unauthorized" });
-
-//         const userId = new ObjectId(req.session.userId);
-//         let user = await userCollection.findOne({ _id: userId });
-//         if (!user) return res.status(404).json({ message: "User not found" });
-
-//         // If twoFA missing or secret missing, create a new disabled secret and persist it
-//         if (!user.twoFA || !user.twoFA.secret) {
-//             const secret = speakeasy.generateSecret({ length: 20 }).base32;
-//             await userCollection.updateOne(
-//                 { _id: userId },
-//                 { $set: { twoFA: { enabled: false, secret } } }
-//             );
-//             user = await userCollection.findOne({ _id: userId });
-//         }
-
-//         // Build otpauth URL and QR
-//         const otpauthUrl = `otpauth://totp/CodocAcademy:${user.email}?secret=${user.twoFA.secret}&issuer=CodocAcademy`;
-
-//         QRCode.toDataURL(otpauthUrl, (err, qrCodeDataUrl) => {
-//             if (err) {
-//                 console.error("QR generation error:", err);
-//                 return res.status(500).json({ message: "Failed to generate QR code" });
-//             }
-//             // Tip: in production you usually don't return the secret; QR is enough
-//             res.json({ qrCode: qrCodeDataUrl /*, secret: user.twoFA.secret */ });
-//         });
-//     } catch (err) {
-//         console.error("get2FA error:", err);
-//         res.status(500).json({ message: "2FA setup failed", error: err.message });
-//     }
-// });
-
-
 app.get('/get2FA', async (req, res) => {
     if (!req.session.userId) return res.status(401).json({ message: "Unauthorized" });
 
@@ -803,48 +648,27 @@ app.get('/get2FA', async (req, res) => {
 });
 
 app.post('/verifyToken', async (req, res) => {
-    try {
-        const { token, tempUserId } = req.body;
-        if (!tempUserId) return res.status(401).json({ verified: false, message: "No tempUserId" });
+    const { token, tempUserId } = req.body;
 
-        const user = await userCollection.findOne({ _id: new ObjectId(tempUserId) });
-        if (!user?.twoFA?.secret) return res.status(400).json({ verified: false, message: "2FA not initialized" });
+    if (!tempUserId) return res.status(401).json({ verified: false });
 
-        const verified = speakeasy.totp.verify({
-            secret: user.twoFA.secret,
-            encoding: 'base32',
-            token,
-            window: 1
-        });
+    const user = await userCollection.findOne({ _id: new ObjectId(tempUserId) });
+    if (!user || !user.twoFA?.enabled) return res.status(400).json({ verified: false });
 
-        if (!verified) return res.json({ verified: false });
+    const verified = speakeasy.totp.verify({
+        secret: user.twoFA.secret,
+        encoding: 'base32',
+        token,
+        window: 1
+    });
 
-        // Ensure 2FA is marked enabled (in case it isn't yet)
-        if (!user.twoFA.enabled) {
-            await userCollection.updateOne(
-                { _id: user._id },
-                { $set: { "twoFA.enabled": true } }
-            );
-        }
-
-        // 🔐 set session and SAVE it before responding
-        req.session.userId = user._id.toString();
-        await new Promise((resolve, reject) => req.session.save(err => err ? reject(err) : resolve()));
-
-        // ✅ return roles so client can redirect immediately
-        return res.json({
-            verified: true,
-            individualUser: !!user.individualUser,
-            inGroup: !!user.inGroup,
-            groupLeader: !!user.groupLeader,
-            superAdmin: !!user.superAdmin
-        });
-    } catch (err) {
-        console.error("verifyToken error:", err);
-        res.status(500).json({ verified: false, message: "Verification failed" });
+    if (verified) {
+        req.session.userId = user._id.toString(); // ✅ Set session
+        return res.json({ verified: true });
     }
-});
 
+    res.json({ verified: false });
+});
 
 
 app.get("/specialties", async (req, res) => {
