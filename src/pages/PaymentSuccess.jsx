@@ -38,21 +38,51 @@ const PaymentSuccess = () => {
   }, []);
 
   const handleVerify = async () => {
-    const response = await fetch(`${url}/verifyToken`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ token }),
-    });
+    try {
+      const code = (token || "").trim();
 
-    const data = await response.json();
-    if (data.verified) {
+      if (!code || code.length < 6) {
+        setError("Please enter the 6‑digit code.");
+        return;
+      }
+
+      // Try verifying the token
+      const res = await fetch(`${url}/verifyToken`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ token: code }) 
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data?.message || "2FA verification failed.");
+        return;
+      }
+
+      if (!data.verified) {
+        setError("Invalid token. Please try again.");
+        return;
+      }
+
       setVerified(true);
-      setTimeout(() => navigate(dashboardPath), 1500);
-    } else {
-      setError("Invalid token. Please try again.");
+
+      // Prefer the path computed from finalizeSignup; if missing, fetch session to decide
+      let path = dashboardPath;
+      if (!path) {
+        const roleResponse = await fetch(`${url}/session`, { credentials: "include" });
+        const user = await roleResponse.json();
+        path = user?.groupLeader ? "/group/dashboard" : "/user/dashboard";
+      }
+
+      setTimeout(() => navigate(path), 1200);
+    } catch (err) {
+      console.error(err);
+      setError("2FA verification failed. Please try again.");
     }
   };
+
 
   return (
     <div className="container my-5 position-relative py-5">
@@ -71,6 +101,8 @@ const PaymentSuccess = () => {
           <h1>✅ Payment Successful</h1>
           <p>Please set up Two-Factor Authentication:</p>
 
+          <p> Download the <strong>Microsoft or Google Authenticator App</strong> on your mobile device and scan this QR code.</p>
+
           {qrCode && <img src={qrCode} alt="Scan this QR code" style={{ margin: '20px' }} />}
 
           <div className="mt-3">
@@ -79,8 +111,16 @@ const PaymentSuccess = () => {
               placeholder="Enter 6-digit code"
               value={token}
               onChange={(e) => setToken(e.target.value)}
+              maxLength={7}
+              // inputMode="numeric"
+              pattern="\d*"
             />
-            <button className="btn btn-darkFuschia" onClick={handleVerify}>Verify</button>
+            <button
+              className="btn btn-darkFuschia"
+              onClick={handleVerify}
+              // disabled={(token || "").trim().length !>= 6}
+              >
+                Verify</button>
             {error && <p className="text-danger mt-2">{error}</p>}
           </div>
         </div>
