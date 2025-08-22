@@ -97,9 +97,10 @@ app.use(
         }),
         cookie: {
             sameSite: 'lax',
-            secure: process.env.NODE_ENV === 'production', // true on prod HTTPS
-            path: '/',                // default path
-            domain: 'ananya.honor-itsolutions.com',
+            // secure: process.env.NODE_ENV === 'production', // true on prod HTTPS
+            //  path: '/',                // default path
+            // domain: 'ananya.honor-itsolutions.com',
+            secure: false,
             httpOnly: true,
         },
     })
@@ -107,11 +108,11 @@ app.use(
 
 
 app.get('/session', async (req, res) => {
-    //console.log("Incoming session:", req.session); // ✅ debug
+    console.log("Incoming session:", req.session); // ✅ debug
 
-    if (!req.session.userId) return res.json({});
 
-    const userId = req.session.userId;
+    const userId = req.session?.userId;
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
 
     if (!ObjectId.isValid(userId)) {
         return res.status(400).json({ error: 'Invalid user ID' });
@@ -809,46 +810,46 @@ app.get('/get2FA', async (req, res) => {
 });
 
 app.post('/verifyToken', async (req, res) => {
-  try {
-    const { token, tempUserId } = req.body;
-    if (!tempUserId) return res.status(401).json({ verified: false, message: "No tempUserId" });
+    try {
+        const { token, tempUserId } = req.body;
+        if (!tempUserId) return res.status(401).json({ verified: false, message: "No tempUserId" });
 
-    const user = await userCollection.findOne({ _id: new ObjectId(tempUserId) });
-    if (!user?.twoFA?.secret) return res.status(400).json({ verified: false, message: "2FA not initialized" });
+        const user = await userCollection.findOne({ _id: new ObjectId(tempUserId) });
+        if (!user?.twoFA?.secret) return res.status(400).json({ verified: false, message: "2FA not initialized" });
 
-    const verified = speakeasy.totp.verify({
-      secret: user.twoFA.secret,
-      encoding: 'base32',
-      token,
-      window: 1
-    });
+        const verified = speakeasy.totp.verify({
+            secret: user.twoFA.secret,
+            encoding: 'base32',
+            token,
+            window: 1
+        });
 
-    if (!verified) return res.json({ verified: false });
+        if (!verified) return res.json({ verified: false });
 
-    // Ensure 2FA is marked enabled (in case it isn't yet)
-    if (!user.twoFA.enabled) {
-      await userCollection.updateOne(
-        { _id: user._id },
-        { $set: { "twoFA.enabled": true } }
-      );
+        // Ensure 2FA is marked enabled (in case it isn't yet)
+        if (!user.twoFA.enabled) {
+            await userCollection.updateOne(
+                { _id: user._id },
+                { $set: { "twoFA.enabled": true } }
+            );
+        }
+
+        // 🔐 set session and SAVE it before responding
+        req.session.userId = user._id.toString();
+        await new Promise((resolve, reject) => req.session.save(err => err ? reject(err) : resolve()));
+
+        // ✅ return roles so client can redirect immediately
+        return res.json({
+            verified: true,
+            individualUser: !!user.individualUser,
+            inGroup: !!user.inGroup,
+            groupLeader: !!user.groupLeader,
+            superAdmin: !!user.superAdmin
+        });
+    } catch (err) {
+        console.error("verifyToken error:", err);
+        res.status(500).json({ verified: false, message: "Verification failed" });
     }
-
-    // 🔐 set session and SAVE it before responding
-    req.session.userId = user._id.toString();
-    await new Promise((resolve, reject) => req.session.save(err => err ? reject(err) : resolve()));
-
-    // ✅ return roles so client can redirect immediately
-    return res.json({
-      verified: true,
-      individualUser: !!user.individualUser,
-      inGroup:       !!user.inGroup,
-      groupLeader:   !!user.groupLeader,
-      superAdmin:    !!user.superAdmin
-    });
-  } catch (err) {
-    console.error("verifyToken error:", err);
-    res.status(500).json({ verified: false, message: "Verification failed" });
-  }
 });
 
 
