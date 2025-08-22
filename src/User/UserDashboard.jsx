@@ -182,7 +182,7 @@ const UserDashboard = () => {
         <div className="min-h-screen p-6">
             {/* Header */}
             <div className="text-center mb-8">
-                <h1 className="fw-bold text-darkFuschia mb-6">{userId.firstName}'s Dashboard</h1>
+                <h1 className="fw-bold text-darkFuschia mb-5">{userId.firstName}'s Dashboard</h1>
 
                 {/* Tags Row */}
                 <div className="relative w-full my-4 overflow-hidden">
@@ -191,6 +191,7 @@ const UserDashboard = () => {
                             className="flex flex-nowrap overflow-x-auto no-scrollbar px-2 py-2 space-x-3"
                             style={{ scrollBehavior: 'smooth' }}
                         >
+                            <p> Scroll Horizontall to view more specialties</p>
                             {specialties.map((tag, index) => (
                                 <span
                                     key={tag.id}
