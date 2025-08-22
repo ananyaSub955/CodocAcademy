@@ -89,7 +89,7 @@ const PaymentSuccess = () => {
   return (
     <div className="container my-5 position-relative py-5">
       <img src={graphic1} className="decorative plus top-left" alt="plus" />
-      <img src={graphic1} className="decorative plus bottom-right m-3" alt="plus" />
+      <img src={graphic1} className="decorative plus bottom-right" alt="plus" />
 
       <h1 className="text-darkFuschia fs-1 p-3 text-center fw-bold">Thank you</h1>
 

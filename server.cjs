@@ -533,13 +533,6 @@ app.get("/generateGroupCode", async (req, res) => {
     res.json({ code });
 });
 
-function buildTwoFA(enabled = false) {
-    const secret = speakeasy.generateSecret({ length: 20 });
-    return {
-        enabled,
-        secret: secret.base32,
-    };
-}
 
 app.post("/finalizeSignup", async (req, res) => {
     const signup = req.session.pendingSignup;

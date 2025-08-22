@@ -191,7 +191,7 @@ const UserDashboard = () => {
                             className="flex flex-nowrap overflow-x-auto no-scrollbar px-2 py-2 space-x-3"
                             style={{ scrollBehavior: 'smooth' }}
                         >
-                            <p> Scroll Horizontall to view more specialties</p>
+                            <p> Scroll Horizontally to view more specialties</p>
                             {specialties.map((tag, index) => (
                                 <span
                                     key={tag.id}
