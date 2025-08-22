@@ -63,6 +63,7 @@ const Login = () => {
         // you may want to re-fetch session or redirect
         const roleResponse = await fetch(`${url}/session`, { credentials: "include" });
         const user = await roleResponse.json();
+        console.log(user);
         redirectToDashboard(user);
       } else {
         setError("Invalid token. Try again.");

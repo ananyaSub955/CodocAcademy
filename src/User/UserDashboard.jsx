@@ -18,8 +18,11 @@ const UserDashboard = () => {
 
     const navigate = useNavigate();
 
+    console.log("user dashboard");
+
     useEffect(() => {
         // Fetch session
+        console.log("Fetching session...");
         fetch(`${url}/session`, { credentials: "include" })
             .then(async (response) => {
                 if (!response.ok) {
@@ -168,6 +171,7 @@ const UserDashboard = () => {
     };
 
     if (!userId) {
+        console.log("User id not found");
         return <div className="text-center mt-10 text-xl text-gray-600">Loading your dashboard...</div>;
     }
 
