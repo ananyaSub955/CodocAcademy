@@ -55,6 +55,7 @@ const PaymentSuccess = () => {
       });
 
       const data = await res.json();
+      console.log(data);
 
       if (!res.ok) {
         setError(data?.message || "2FA verification failed.");
@@ -122,6 +123,7 @@ const PaymentSuccess = () => {
               >
                 Verify</button>
             {error && <p className="text-danger mt-2">{error}</p>}
+            <p className='text-danger mt-3'>The authentication key may not appear to work, but please log in. Your account has been created successfully. The software is currently being modified</p>
           </div>
         </div>
       )}
