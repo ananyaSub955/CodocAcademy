@@ -97,7 +97,9 @@ app.use(
         }),
         cookie: {
             sameSite: 'lax',
-            secure: false,
+            secure: process.env.NODE_ENV === 'production', // true on prod HTTPS
+            path: '/',                // default path
+            domain: 'ananya.honor-itsolutions.com',
             httpOnly: true,
         },
     })
@@ -309,7 +311,15 @@ app.post("/individualSignup", async (req, res) => {
             cancel_url: cancelUrl,
         });
 
-        res.json({ url: session.url });
+        // res.json({ url: session.url });
+
+        req.session.save(err => {
+            if (err) {
+                console.error('session save error', err);
+                return res.status(500).json({ message: "Could not persist session" });
+            }
+            res.json({ url: session.url });
+        });
     } catch (error) {
         res.status(500).json({ message: "Error signing up", error: error.message });
     }
@@ -490,7 +500,15 @@ app.post("/createGroup", async (req, res) => {
             cancel_url: cancelUrl,
         });
 
-        res.json({ url: session.url });
+        // res.json({ url: session.url });
+
+        req.session.save(err => {
+            if (err) {
+                console.error('session save error', err);
+                return res.status(500).json({ message: "Could not persist session" });
+            }
+            res.json({ url: session.url });
+        });
 
 
     } catch (error) {
@@ -515,11 +533,11 @@ app.get("/generateGroupCode", async (req, res) => {
 });
 
 function buildTwoFA(enabled = false) {
-  const secret = speakeasy.generateSecret({ length: 20 });
-  return {
-    enabled,
-    secret: secret.base32,
-  };
+    const secret = speakeasy.generateSecret({ length: 20 });
+    return {
+        enabled,
+        secret: secret.base32,
+    };
 }
 
 // app.post("/finalizeSignup", async (req, res) => {
@@ -633,138 +651,138 @@ function buildTwoFA(enabled = false) {
 
 
 app.post("/finalizeSignup", async (req, res) => {
-  try {
-    const signup = req.session.pendingSignup;
-    if (!signup) return res.status(400).json({ message: "No pending signup" });
+    try {
+        const signup = req.session.pendingSignup;
+        if (!signup) return res.status(400).json({ message: "No pending signup" });
 
-    const { type, frequency, size, formData } = signup;
-    const plan = type === "group" ? `group_${size}_${frequency}` : `individual_${frequency}`;
+        const { type, frequency, size, formData } = signup;
+        const plan = type === "group" ? `group_${size}_${frequency}` : `individual_${frequency}`;
 
-    if (formData.code) {
-      const existingGroup = await groupCollection.findOne({ code: formData.code });
-      if (existingGroup) return res.status(400).json({ message: "Code already in use" });
+        if (formData.code) {
+            const existingGroup = await groupCollection.findOne({ code: formData.code });
+            if (existingGroup) return res.status(400).json({ message: "Code already in use" });
+        }
+
+        const existingUser = await userCollection.findOne({ email: formData.email });
+        if (existingUser) return res.status(400).json({ message: "Email already used as user" });
+
+        const hashedPassword = await bcrypt.hash(formData.password, 10);
+
+        if (type === "individual") {
+            const twoFA = buildTwoFA(false); // disabled until verified
+
+            await userCollection.insertOne({
+                ...formData,
+                password: hashedPassword,
+                hasPaid: true,
+                plan,
+                inGroup: false,
+                groupLeader: false,
+                individualUser: true,
+                superAdmin: false,
+                bookmarks: [],
+                recentlyViewed: [],
+                twoFA, // always present (enabled: false)
+            });
+
+            const user = await userCollection.findOne({ email: formData.email });
+
+            req.session.user = {
+                id: user._id,
+                email: user.email,
+                firstName: user.firstName,
+                code: user.code,
+                groupLeader: false,
+                inGroup: false,
+                individualUser: true,
+                superAdmin: false,
+            };
+            req.session.userId = user._id.toString();
+        } else {
+            // GROUP
+            await groupCollection.insertOne({
+                groupName: formData.groupName,
+                email: formData.email,
+                password: hashedPassword,
+                code: formData.code,
+                members: [], // optionally add the admin later
+                hasPaid: true,
+                plan,
+            });
+
+            const twoFA = buildTwoFA(false); // disabled until verified
+
+            await userCollection.insertOne({
+                email: formData.email,
+                password: hashedPassword,
+                firstName: formData.groupName,
+                lastName: "Admin",
+                inGroup: true,
+                groupLeader: true,
+                individualUser: false,
+                superAdmin: false,
+                code: formData.code,
+                hasPaid: true,
+                plan,
+                twoFA,
+            });
+
+            const user = await userCollection.findOne({ email: formData.email });
+
+            req.session.user = {
+                id: user._id,
+                email: user.email,
+                firstName: user.firstName,
+                code: user.code,
+                groupLeader: true,
+                inGroup: true,
+                individualUser: false,
+                superAdmin: false,
+            };
+            req.session.userId = user._id.toString();
+        }
+
+        delete req.session.pendingSignup;
+        res.json({ success: true, groupLeader: type === "group" });
+    } catch (err) {
+        console.error("finalizeSignup error:", err);
+        res.status(500).json({ message: "Finalize signup failed", error: err.message });
     }
-
-    const existingUser = await userCollection.findOne({ email: formData.email });
-    if (existingUser) return res.status(400).json({ message: "Email already used as user" });
-
-    const hashedPassword = await bcrypt.hash(formData.password, 10);
-
-    if (type === "individual") {
-      const twoFA = buildTwoFA(false); // disabled until verified
-
-      await userCollection.insertOne({
-        ...formData,
-        password: hashedPassword,
-        hasPaid: true,
-        plan,
-        inGroup: false,
-        groupLeader: false,
-        individualUser: true,
-        superAdmin: false,
-        bookmarks: [],
-        recentlyViewed: [],
-        twoFA, // always present (enabled: false)
-      });
-
-      const user = await userCollection.findOne({ email: formData.email });
-
-      req.session.user = {
-        id: user._id,
-        email: user.email,
-        firstName: user.firstName,
-        code: user.code,
-        groupLeader: false,
-        inGroup: false,
-        individualUser: true,
-        superAdmin: false,
-      };
-      req.session.userId = user._id.toString();
-    } else {
-      // GROUP
-      await groupCollection.insertOne({
-        groupName: formData.groupName,
-        email: formData.email,
-        password: hashedPassword,
-        code: formData.code,
-        members: [], // optionally add the admin later
-        hasPaid: true,
-        plan,
-      });
-
-      const twoFA = buildTwoFA(false); // disabled until verified
-
-      await userCollection.insertOne({
-        email: formData.email,
-        password: hashedPassword,
-        firstName: formData.groupName,
-        lastName: "Admin",
-        inGroup: true,
-        groupLeader: true,
-        individualUser: false,
-        superAdmin: false,
-        code: formData.code,
-        hasPaid: true,
-        plan,
-        twoFA,
-      });
-
-      const user = await userCollection.findOne({ email: formData.email });
-
-      req.session.user = {
-        id: user._id,
-        email: user.email,
-        firstName: user.firstName,
-        code: user.code,
-        groupLeader: true,
-        inGroup: true,
-        individualUser: false,
-        superAdmin: false,
-      };
-      req.session.userId = user._id.toString();
-    }
-
-    delete req.session.pendingSignup;
-    res.json({ success: true, groupLeader: type === "group" });
-  } catch (err) {
-    console.error("finalizeSignup error:", err);
-    res.status(500).json({ message: "Finalize signup failed", error: err.message });
-  }
 });
 
 app.get('/get2FA', async (req, res) => {
-  try {
-    if (!req.session.userId) return res.status(401).json({ message: "Unauthorized" });
+    try {
+        if (!req.session.userId) return res.status(401).json({ message: "Unauthorized" });
 
-    const userId = new ObjectId(req.session.userId);
-    let user = await userCollection.findOne({ _id: userId });
-    if (!user) return res.status(404).json({ message: "User not found" });
+        const userId = new ObjectId(req.session.userId);
+        let user = await userCollection.findOne({ _id: userId });
+        if (!user) return res.status(404).json({ message: "User not found" });
 
-    // If twoFA missing or secret missing, create a new disabled secret and persist it
-    if (!user.twoFA || !user.twoFA.secret) {
-      const secret = speakeasy.generateSecret({ length: 20 }).base32;
-      await userCollection.updateOne(
-        { _id: userId },
-        { $set: { twoFA: { enabled: false, secret } } }
-      );
-      user = await userCollection.findOne({ _id: userId });
+        // If twoFA missing or secret missing, create a new disabled secret and persist it
+        if (!user.twoFA || !user.twoFA.secret) {
+            const secret = speakeasy.generateSecret({ length: 20 }).base32;
+            await userCollection.updateOne(
+                { _id: userId },
+                { $set: { twoFA: { enabled: false, secret } } }
+            );
+            user = await userCollection.findOne({ _id: userId });
+        }
+
+        // Build otpauth URL and QR
+        const otpauthUrl = `otpauth://totp/CodocAcademy:${user.email}?secret=${user.twoFA.secret}&issuer=CodocAcademy`;
+
+        QRCode.toDataURL(otpauthUrl, (err, qrCodeDataUrl) => {
+            if (err) {
+                console.error("QR generation error:", err);
+                return res.status(500).json({ message: "Failed to generate QR code" });
+            }
+            // Tip: in production you usually don't return the secret; QR is enough
+            res.json({ qrCode: qrCodeDataUrl /*, secret: user.twoFA.secret */ });
+        });
+    } catch (err) {
+        console.error("get2FA error:", err);
+        res.status(500).json({ message: "2FA setup failed", error: err.message });
     }
-
-    // Build otpauth URL and QR
-    const otpauthUrl = `otpauth://totp/CodocAcademy:${user.email}?secret=${user.twoFA.secret}&issuer=CodocAcademy`;
-
-    QRCode.toDataURL(otpauthUrl, (err, qrCodeDataUrl) => {
-      if (err) {
-        console.error("QR generation error:", err);
-        return res.status(500).json({ message: "Failed to generate QR code" });
-      }
-      // Tip: in production you usually don't return the secret; QR is enough
-      res.json({ qrCode: qrCodeDataUrl /*, secret: user.twoFA.secret */ });
-    });
-  } catch (err) {
-    console.error("get2FA error:", err);
-    res.status(500).json({ message: "2FA setup failed", error: err.message });
-  }
 });
 
 
