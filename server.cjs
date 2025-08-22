@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
-const bodyParser = require('body-parser');
+// const bodyParser = require('body-parser');
 const speakeasy = require('speakeasy');
 const QRCode = require('qrcode');
 require('dotenv').config({ path: 'config.env' });
@@ -9,7 +9,7 @@ require('dotenv').config({ path: 'config.env' });
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 const app = express();
-app.use(bodyParser.json());
+// app.use(bodyParser.json());
 
 const PORT = 5000;
 
@@ -21,10 +21,10 @@ const MongoStore = require("connect-mongo");
 app.use(express.urlencoded({ extended: true }));
 
 const bcrypt = require("bcryptjs");
-const { data } = require('react-router-dom');
+//const { data } = require('react-router-dom');
 
 const uri = process.env.MONGOURL;
-const baseUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+// const baseUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
 
 function getClientOrigin(req) {
     // Prefer the browser's Origin header if it's one of your allowed origins
@@ -65,7 +65,7 @@ connectToMongoDB();
 
 const allowedOrigins = [
     'http://localhost:5173',
-    'https://ananya.honor-itsolutions.com'
+    'https://ananya.honor-itsolutions.com',
 ];
 
 app.use(cors({
@@ -73,7 +73,9 @@ app.use(cors({
         if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
-            callback(new Error('Not allowed by CORS'));
+            const err = new Error("Not allowed by CORS");
+            err.status = 403;
+            callback(err);
         }
     },
     credentials: true
@@ -181,54 +183,15 @@ const diabetesCollection = database.collection("Diabetes");
 const searchDb = searchClient.db("CodocAcademy");
 const diabetesSearchCollection = searchDb.collection("Diabetes");
 
-// (async () => {
-//     try {
-//         // Use a separate, non-strict client ONLY to create the index
-//         const adminClient = new MongoClient(uri); // no serverApi.strict
-//         await adminClient.connect();
-
-//         const adminDb = adminClient.db("CodocAcademy");
-//         const adminDiabetes = adminDb.collection("Diabetes");
-
-//         // Optional: drop any existing text indexes except our target
-//         const existing = await adminDiabetes.indexes();
-//         for (const idx of existing) {
-//             if (idx.name !== "search_text" && idx.key && idx.key._fts === "text") {
-//                 try { await adminDiabetes.dropIndex(idx.name); } catch { }
-//             }
-//         }
-
-//         // Create the single compound text index (runs once)
-//         const hasSearch = existing.some(i => i.name === "search_text");
-//         if (!hasSearch) {
-//             await adminDiabetes.createIndex(
-//                 {
-//                     Category: "text",
-//                     Subcategory: "text",
-//                     SubTopics: "text",
-//                     Headers: "text",
-//                     Explanation: "text",
-//                     "ICD 10": "text",
-//                     "Coding/Documentation tip": "text",
-//                 },
-//                 {
-//                     name: "search_text",
-//                     weights: { Explanation: 10, Headers: 5 },
-//                     default_language: "none",
-//                 }
-//             );
-//             console.log("Created text index: search_text");
-//         }
-
-//         await adminClient.close();
-//     } catch (e) {
-//         console.error("Index setup failed:", e);
-//     }
-// })();
-
 
 
 app.post("/login", async (req, res) => {
+    console.log('=== LOGIN REQUEST ===');
+    console.log('Headers:', req.headers);
+    console.log('Body:', req.body);
+    console.log('Session ID:', req.sessionID);
+    console.log('=====================');
+
     const { email, password } = req.body;
 
     try {
@@ -885,75 +848,6 @@ app.get('/user/:id/recentlyViewed', async (req, res) => {
     }
 });
 
-// app.get('/user/:id/recommendations', async (req, res) => {
-//     const { id } = req.params;
-//     if (!ObjectId.isValid(id)) return res.status(400).json({ error: "Invalid user ID" });
-
-//     const user = await userCollection.findOne({ _id: new ObjectId(id) });
-//     const bookmarks = user.bookmarks || [];
-
-//     const subtopicNames = bookmarks.map(b => b.name);
-//     const bookmarkIds = new Set(bookmarks.map(b => String(b._id)));
-
-//     const bookmarkSubTopics = new Set(bookmarks.map(b => (b.name || "").trim().toLowerCase()));
-
-//     const categories = [...new Set(bookmarks.map(b => b.Category?.trim()).filter(Boolean))];
-
-//     const collections = ["Diabetes", "Renal", "Cardiology", "Vascular", "Neurology"];
-//     let recommendations = [];
-
-//     for (let name of collections) {
-//         const col = req.app.locals.db.collection(name);
-//         //const subcategories = bookmarks.map(b => b.Subcategory).filter(Boolean);
-//         const matches = await col.find({
-//             $or: [
-//                 { SubTopics: { $in: subtopicNames } },
-//                 { Category: { $in: categories } }
-//             ]
-//         }).toArray();
-
-//         for (const item of matches) {
-//             const idStr = String(item._id);
-//             const nameStr = (item.SubTopics || "").trim().toLowerCase();
-
-//             const alreadySeen = bookmarkIds.has(idStr) || bookmarkSubTopics.has(nameStr);
-
-//             if (!alreadySeen) {
-//                 recommendations.push({
-//                     _id: idStr,
-//                     SubTopics: item.SubTopics || "",
-//                     Category: item.Category || "",
-//                     Subcategory: item.Subcategory || ""
-//                 });
-//             }
-//         }
-
-//     }
-
-//     //console.log(recommendations);
-
-//     // Remove already-bookmarked items
-//     //const bookmarkIds = new Set(bookmarks.map(b => String(b._id)));
-
-//     // console.log("bookmark IDs:", [...bookmarkIds]);
-//     // console.log("------");
-//     // console.log("recommendation IDs:", recommendations.map(r => String(r._id)));
-
-//     //const uniqueRecs = recommendations.filter(r => !bookmarkIds.has(String(r._id)));
-
-//     //console.log(uniqueRecs);
-//     //res.json(uniqueRecs.slice(0, 10));
-
-//     const seen = new Set();
-//     const unique = recommendations.filter(r => {
-//         if (seen.has(r._id)) return false;
-//         seen.add(r._id);
-//         return true;
-//     });
-
-//     //console.log(unique);
-//     res.json(unique.slice(0, 10));
-// });
 
 app.get('/groups', async (req, res) => {
     try {
@@ -1110,8 +1004,21 @@ app.get('/search', async (req, res) => {
 });
 
 
-
 app.get('/health', (_req, res) => res.send("ok"));
+
+// Always return JSON for errors
+app.use((err, req, res, next) => {
+    console.error("Global error handler:", err);
+
+    // Default to 500 if not already set
+    const status = err.status || 500;
+
+    res.status(status).json({
+        success: false,
+        message: err.message || "Internal Server Error",
+    });
+});
+
 
 //LOGOUT ROUTE
 app.get("/logout", (req, res) => {
