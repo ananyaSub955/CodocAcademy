@@ -284,8 +284,8 @@ app.post("/individualSignup", async (req, res) => {
         };
 
         const priceId = frequency === "yearly"
-            ? 'price_1RnTtaFa5BATz5g02VLVxJyI'
-            : 'price_1Rlr0eFa5BATz5g0m33bFvi8';
+            ? 'price_1RyleN7zM3Arj80OsM2BLOlH' //yearly
+            : 'price_1RyleN7zM3Arj80Ohoin6u2c'; //monthly
 
         // const session = await stripe.checkout.sessions.create({
         //     mode: 'subscription',
@@ -453,12 +453,12 @@ app.post("/createGroup", async (req, res) => {
         let priceId;
         if (size === "lt10") {
             priceId = frequency === "monthly"
-                ? "price_1RlrK2Fa5BATz5g0SgC8m6yW"
-                : "price_1RnTsxFa5BATz5g0xaZOoKAa";
+                ? "price_1Rylgq7zM3Arj80OW4C94A8L"
+                : "price_1Rylgq7zM3Arj80OAh8pktX8"; //yearly
         } else {
             priceId = frequency === "monthly"
-                ? "price_1RlrIxFa5BATz5g0DSuWVrtb"
-                : "price_1RnTsIFa5BATz5g0I2SHe2qw";
+                ? "price_1Rylfp7zM3Arj80Og1Lj8rvH"
+                : "price_1Rylfp7zM3Arj80OHJxgtQ1Q"; //yearly
         }
 
         req.session.pendingSignup = {
