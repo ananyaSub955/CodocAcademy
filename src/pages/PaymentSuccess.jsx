@@ -58,6 +58,7 @@ const PaymentSuccess = () => {
       console.log(data);
 
       if (!res.ok) {
+        console.log("point 1",res);
         setError(data?.message || "2FA verification failed.");
         return;
       }
@@ -88,7 +89,7 @@ const PaymentSuccess = () => {
   return (
     <div className="container my-5 position-relative py-5">
       <img src={graphic1} className="decorative plus top-left" alt="plus" />
-      <img src={graphic1} className="decorative plus bottom-right" alt="plus" />
+      <img src={graphic1} className="decorative plus bottom-right m-3" alt="plus" />
 
       <h1 className="text-darkFuschia fs-1 p-3 text-center fw-bold">Thank you</h1>
 
@@ -123,7 +124,7 @@ const PaymentSuccess = () => {
               >
                 Verify</button>
             {error && <p className="text-danger mt-2">{error}</p>}
-            <p className='text-danger mt-3'>The authentication key may not appear to work, but please log in. Your account has been created successfully. The software is currently being modified</p>
+            <p className='text-danger mt-3' style={{ overflowWrap: 'break-word' }}>The authentication key may not appear to work, but please log in. Your account has been created successfully. The software is currently being modified</p>
           </div>
         </div>
       )}
