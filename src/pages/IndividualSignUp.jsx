@@ -24,6 +24,9 @@ const IndividualSignUp = () => {
 
     const handleSignUp = async (e) => {
         e.preventDefault();
+
+        console.log("Sign Up");
+
         if (!firstName || !lastName || !email || !password) {
             alert("Please fill in all fields.");
             return;
@@ -39,6 +42,7 @@ const IndividualSignUp = () => {
 
             const data = await response.json();
             if (response.ok && data.url) {
+                console.log("Redirecting to Stripe checkout");
                 window.location.href = data.url; // Stripe checkout
             } else {
                 setError(data.message || "Signup failed.");

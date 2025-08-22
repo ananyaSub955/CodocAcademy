@@ -4,7 +4,7 @@ import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 
 const url = window.location.hostname === "localhost"
     ? "http://localhost:5000"
-    : "https://ananya.honor-itsolutions.com";
+    : "https://ananya.honor-itsolutions.com/node";
 
 const UserDashboard = () => {
     const [userId, setUser] = useState(null);
