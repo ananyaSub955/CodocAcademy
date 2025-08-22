@@ -45,7 +45,7 @@ const IndividualSignUp = () => {
                 console.log("Redirecting to Stripe checkout");
                 window.location.href = data.url; // Stripe checkout
             } else {
-                setError(data.message || "Signup failed.");
+                setError(data.error || data.message || `Signup failed (HTTP ${response.status}).`);
             }
         } catch (err) {
             console.error("Signup error:", err);

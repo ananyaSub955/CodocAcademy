@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 const url = window.location.hostname === "localhost"
   ? "http://localhost:5000"
-  : "https://ananya.honor-itsolutions.com";
+  : "https://ananya.honor-itsolutions.com/node";
 
 const SubscriptionForm  = () => {
   const [planType, setPlanType] = useState('individual');
