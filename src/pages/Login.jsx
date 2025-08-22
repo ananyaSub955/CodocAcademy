@@ -19,6 +19,8 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
 
+    console.log("Logging");
+
     try {
       const response = await fetch(`${url}/login`, {
         method: 'POST',
