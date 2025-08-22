@@ -48,31 +48,31 @@ const Login = () => {
     }
   };
 
-  const handle2FAVerify = async () => {
-    try {
-      const res = await fetch(`${url}/verifyToken`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ token, tempUserId })
-      });
+ const handle2FAVerify = async () => {
+  try {
+    const res = await fetch(`${url}/verifyToken`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ token, tempUserId })
+    });
+    const data = await res.json();
+    if (data.verified) {
+      // redirect immediately using flags from the response
+      redirectToDashboard(data);
 
-      const data = await res.json();
-
-      if (data.verified) {
-        // you may want to re-fetch session or redirect
-        const roleResponse = await fetch(`${url}/session`, { credentials: "include" });
-        const user = await roleResponse.json();
-        console.log(user);
-        redirectToDashboard(user);
-      } else {
-        setError("Invalid token. Try again.");
-      }
-    } catch (err) {
-      setError("2FA verification failed.");
-      console.error(err);
+      // (optional) if you still want to double-check, you can fetch /session after:
+      // const s = await fetch(`${url}/session`, { credentials: "include" }).then(r => r.json());
+      // redirectToDashboard(s);
+    } else {
+      setError("Invalid token. Try again.");
     }
-  };
+  } catch (err) {
+    console.error(err);
+    setError("2FA verification failed.");
+  }
+};
+
 
   const redirectToDashboard = ({ individualUser, inGroup, groupLeader, superAdmin }) => {
     if (groupLeader) {
