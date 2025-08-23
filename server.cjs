@@ -675,6 +675,7 @@ app.post('/verifyToken', async (req, res) => {
     const user = await userCollection.findOne({ _id: new ObjectId(tempUserId) });
     if (!user || !user.twoFA?.enabled) return res.status(400).json({ verified: false });
 
+
   const verified = speakeasy.totp.verify({
     secret: user.twoFA.secret,
     encoding: 'base32',
