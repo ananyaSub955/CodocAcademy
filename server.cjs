@@ -279,9 +279,16 @@ app.post("/individualSignup", async (req, res) => {
             frequency,
         };
 
+        //LIVE DEV ==============================
+        // const priceId = frequency === "yearly"
+        //     ? 'price_1RykDGGFIwTWAvcX0qxlQaLM' //yearly
+        //     : 'price_1RykDGGFIwTWAvcXNiCTfOoz'; //monthly
+
+
+        //TESTING ==============================
         const priceId = frequency === "yearly"
-            ? 'price_1RykDGGFIwTWAvcX0qxlQaLM' //yearly
-            : 'price_1RykDGGFIwTWAvcXNiCTfOoz'; //monthly
+            ? 'price_1RyleN7zM3Arj80OsM2BLOlH' //yearly
+            : 'price_1RyleN7zM3Arj80Ohoin6u2c'; //monthly
 
         // const session = await stripe.checkout.sessions.create({
         //     mode: 'subscription',
@@ -448,13 +455,27 @@ app.post("/createGroup", async (req, res) => {
 
         let priceId;
         if (size === "lt10") {
+
+            //LIVE DEV ==============================
+            // priceId = frequency === "monthly"
+            //     ? "price_1RykHUGFIwTWAvcXrrXbaHok"
+            //     : "price_1RykHUGFIwTWAvcX4dpVg5zh"; //yearly
+
+
+            //TESTING ==============================
             priceId = frequency === "monthly"
-                ? "price_1RykHUGFIwTWAvcXrrXbaHok"
-                : "price_1RykHUGFIwTWAvcX4dpVg5zh"; //yearly
+                ? "price_1Rylgq7zM3Arj80OW4C94A8L"
+                : "price_1Rylgq7zM3Arj80OAh8pktX8"; //yearly
         } else {
+            //LIVE DEV ==============================
+            // priceId = frequency === "monthly"
+            //     ? "price_1RykGkGFIwTWAvcXJnigcbSx"
+            //     : "price_1RykGkGFIwTWAvcXUXR1SHB2"; //yearly
+
+            //TESTING ==============================
             priceId = frequency === "monthly"
-                ? "price_1RykGkGFIwTWAvcXJnigcbSx"
-                : "price_1RykGkGFIwTWAvcXUXR1SHB2"; //yearly
+                ? "price_1Rylfp7zM3Arj80Og1Lj8rvH"
+                : "price_1Rylfp7zM3Arj80Og1Lj8rvH"; //yearly
         }
 
         req.session.pendingSignup = {
@@ -644,11 +665,16 @@ app.get('/get2FA', async (req, res) => {
 });
 
 app.post('/verifyToken', async (req, res) => {
-  const { token, tempUserId } = req.body;
-  if (!tempUserId) return res.status(401).json({ verified: false });
+    const { token, tempUserId } = req.body;
+    
+    const uid = tempUserId || req.session.userId;
+    if (!uid) {
+        return res.status(401).json({ verified: false, message: 'Missing user context' });
+    }
 
-  const user = await userCollection.findOne({ _id: new ObjectId(tempUserId) });
-  if (!user || !user.twoFA?.enabled) return res.status(400).json({ verified: false });
+    const user = await userCollection.findOne({ _id: new ObjectId(tempUserId) });
+    if (!user || !user.twoFA?.enabled) return res.status(400).json({ verified: false });
+
 
   const verified = speakeasy.totp.verify({
     secret: user.twoFA.secret,
@@ -1008,107 +1034,107 @@ app.get('/search', async (req, res) => {
 
 // GET /search (or rename to /search/icd-or-subtopic and update your FE)
 app.get('/search', async (req, res) => {
-  try {
-    const q = (req.query.q || '').trim();
-    if (!q) return res.status(400).json({ error: 'Missing query ?q=' });
+    try {
+        const q = (req.query.q || '').trim();
+        if (!q) return res.status(400).json({ error: 'Missing query ?q=' });
 
 
 
-    // Normalize query for exact ICD-10 comparison, e.g. "E11.42" -> "E1142"
-    const normalizeICD = (s) => s.toUpperCase().replace(/[.\s-]/g, '');
-    const qICD = normalizeICD(q);
-    const regex = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+        // Normalize query for exact ICD-10 comparison, e.g. "E11.42" -> "E1142"
+        const normalizeICD = (s) => s.toUpperCase().replace(/[.\s-]/g, '');
+        const qICD = normalizeICD(q);
+        const regex = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
 
-    // Discover all specialty collections (skip system + "specialties")
-    const allColls = await database.listCollections().toArray();
-    const specialtyCollections = allColls
-      .map(c => c.name)
-      .filter(name => name !== 'specialties' && !name.startsWith('system.'));
+        // Discover all specialty collections (skip system + "specialties")
+        const allColls = await database.listCollections().toArray();
+        const specialtyCollections = allColls
+            .map(c => c.name)
+            .filter(name => name !== 'specialties' && !name.startsWith('system.'));
 
-    const perCollectionLimit = 10;
+        const perCollectionLimit = 10;
 
-    const perCollPromises = specialtyCollections.map(async (coll) => {
-      const pipeline = [
-        // Build a normalized ICD field from "ICD 10"
-        {
-          $addFields: {
-            __icd10_norm: {
-              $replaceAll: {
-                input: {
-                  $replaceAll: {
-                    input: {
-                      $replaceAll: {
-                        input: { $toUpper: { $ifNull: ["$ICD 10", ""] } },
-                        find: ".",
-                        replacement: ""
-                      }
-                    },
-                    find: " ",
-                    replacement: ""
-                  }
+        const perCollPromises = specialtyCollections.map(async (coll) => {
+            const pipeline = [
+                // Build a normalized ICD field from "ICD 10"
+                {
+                    $addFields: {
+                        __icd10_norm: {
+                            $replaceAll: {
+                                input: {
+                                    $replaceAll: {
+                                        input: {
+                                            $replaceAll: {
+                                                input: { $toUpper: { $ifNull: ["$ICD 10", ""] } },
+                                                find: ".",
+                                                replacement: ""
+                                            }
+                                        },
+                                        find: " ",
+                                        replacement: ""
+                                    }
+                                },
+                                find: "-",
+                                replacement: ""
+                            }
+                        }
+                    }
                 },
-                find: "-",
-                replacement: ""
-              }
-            }
-          }
-        },
-        {
-          $match: {
-            $or: [
-              { __icd10_norm: qICD },                 // exact normalized ICD match
-              { "ICD 10": { $regex: regex } },        // partial ICD text match
-              { SubTopics: { $regex: regex } }        // partial SubTopics match
-            ]
-          }
-        },
-        {
-          $project: {
-            _id: 1,
-            SubTopics: 1,
-            Category: 1,
-            Subcategory: 1,
-            "ICD 10": 1,
-            "Clinical tip": 1,
-            "Coding/Documentation tip": 1,
-            __icd10_norm: 1 // <-- keep it so we can classify on the server
-          }
-        },
-        { $limit: perCollectionLimit }
-      ];
+                {
+                    $match: {
+                        $or: [
+                            { __icd10_norm: qICD },                 // exact normalized ICD match
+                            { "ICD 10": { $regex: regex } },        // partial ICD text match
+                            { SubTopics: { $regex: regex } }        // partial SubTopics match
+                        ]
+                    }
+                },
+                {
+                    $project: {
+                        _id: 1,
+                        SubTopics: 1,
+                        Category: 1,
+                        Subcategory: 1,
+                        "ICD 10": 1,
+                        "Clinical tip": 1,
+                        "Coding/Documentation tip": 1,
+                        __icd10_norm: 1 // <-- keep it so we can classify on the server
+                    }
+                },
+                { $limit: perCollectionLimit }
+            ];
 
-      const docs = await database.collection(coll).aggregate(pipeline).toArray();
+            const docs = await database.collection(coll).aggregate(pipeline).toArray();
 
-      return docs.map(d => {
-        const isExactICD = d.__icd10_norm && d.__icd10_norm === qICD;
-        return {
-          type: isExactICD ? "icd10" : "subtopic",
-          collection: coll,
-          _id: d._id,
-          title: d.SubTopics || d["ICD 10"] || "(untitled)",
-          snippet: d["ICD 10"] ? `ICD-10: ${d["ICD 10"]}` : "",
-          extra: {
-            Category: d.Category || null,
-            Subcategory: d.Subcategory || null,
-            SubTopics: d.SubTopics || null,
-            ICD10: d["ICD 10"] || null,
-            ClinicalTip: d["Clinical tip"] || null,
-            CodingTip: d["Coding/Documentation tip"] || null
-          }
-        };
-      });
-    });
+            return docs.map(d => {
+                const isExactICD = d.__icd10_norm && d.__icd10_norm === qICD;
+                return {
+                    type: isExactICD ? "icd10" : "subtopic",
+                    collection: coll,
+                    _id: d._id,
+                    title: d.SubTopics || d["ICD 10"] || "(untitled)",
+                    snippet: d["ICD 10"] ? `ICD-10: ${d["ICD 10"]}` : "",
+                    extra: {
+                        Category: d.Category || null,
+                        Subcategory: d.Subcategory || null,
+                        SubTopics: d.SubTopics || null,
+                        ICD10: d["ICD 10"] || null,
+                        ClinicalTip: d["Clinical tip"] || null,
+                        CodingTip: d["Coding/Documentation tip"] || null
+                    }
+                };
+            });
+        });
 
-    let results = (await Promise.all(perCollPromises)).flat();
+        let results = (await Promise.all(perCollPromises)).flat();
 
-    // Prioritize exact ICD matches first
-    results.sort((a, b) => (a.type === "icd10" ? -1 : 1) - (b.type === "icd10" ? -1 : 1));
+        // Prioritize exact ICD matches first
+        results.sort((a, b) => (a.type === "icd10" ? -1 : 1) - (b.type === "icd10" ? -1 : 1));
 
-    res.json({ query: q, total: results.length, results });
-  } catch (err) {
-    console.error("Search error:", err);
-    res.status(500).json({ error: "Search failed" });
-  }
+        res.json({ query: q, total: results.length, results });
+    } catch (err) {
+        console.error("Search error:", err);
+        res.status(500).json({ error: "Search failed" });
+    }
 });
 
 
