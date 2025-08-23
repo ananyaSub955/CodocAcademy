@@ -200,7 +200,7 @@ app.post("/login", async (req, res) => {
         if (user.twoFA?.enabled) {
             return res.status(200).json({
                 requires2FA: true,
-                tempUserId: user._id,
+                tempUserId: user._id.toString(),
                 individualUser: user.individualUser || false,
                 inGroup: user.inGroup || false,
                 groupLeader: user.groupLeader || false,
@@ -644,27 +644,34 @@ app.get('/get2FA', async (req, res) => {
 });
 
 app.post('/verifyToken', async (req, res) => {
-    const { token, tempUserId } = req.body;
+  const { token, tempUserId } = req.body;
+  if (!tempUserId) return res.status(401).json({ verified: false });
 
-    if (!tempUserId) return res.status(401).json({ verified: false });
+  const user = await userCollection.findOne({ _id: new ObjectId(tempUserId) });
+  if (!user || !user.twoFA?.enabled) return res.status(400).json({ verified: false });
 
-    const user = await userCollection.findOne({ _id: new ObjectId(tempUserId) });
-    if (!user || !user.twoFA?.enabled) return res.status(400).json({ verified: false });
+  const verified = speakeasy.totp.verify({
+    secret: user.twoFA.secret,
+    encoding: 'base32',
+    token,
+    window: 1
+  });
 
-    const verified = speakeasy.totp.verify({
-        secret: user.twoFA.secret,
-        encoding: 'base32',
-        token,
-        window: 1
+  if (verified) {
+    req.session.userId = user._id.toString();
+
+    // ✅ include role flags so the client can route immediately
+    return res.json({
+      verified: true,
+      individualUser: user.individualUser || false,
+      inGroup: user.inGroup || false,
+      groupLeader: user.groupLeader || false,
+      superAdmin: user.superAdmin || false
     });
-
-    if (verified) {
-        req.session.userId = user._id.toString(); // ✅ Set session
-        return res.json({ verified: true });
-    }
-
-    res.json({ verified: false });
+  }
+  res.json({ verified: false });
 });
+
 
 
 app.get("/specialties", async (req, res) => {
