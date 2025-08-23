@@ -10,13 +10,13 @@ const Footer = () => {
                         <p>
                             CoDoc supports providers in creating
                             better patient health outcomes and strives to
-                            empower and educate providers through training
-                            to optimize patient visits
+                            empower and educate providers through training in clinicial documentation
+                            to optimize patient visits.
                         </p>
                     </div>
 
                     <div className="col-lg-3 col-md-6 ">
-                        <h5 className="mb-3 text-light font-bold">Contact Us</h5>
+                        <h5 className="mb-3 text-light font-bold">Connect with Us</h5>
                         <div className="flex text-2xl mb-2">
                             <a
                                 href="https://www.facebook.com/people/CoDoc-Academy/61558952303145/"
@@ -47,16 +47,16 @@ const Footer = () => {
 
 
                     <div className="col-lg-3 col-md-6 mb-4">
-                        <h5 className="mb-1 text-light font-weight-bold">Opening Hours</h5>
+                        <h5 className="mb-1 text-light font-weight-bold">Contact Us</h5>
                         <table className="w-full text-sm text-left text-white">
                             <tbody>
                                 <tr>
-                                    <td className="pr-4">Mon - Fri:</td>
-                                    <td>8am - 9pm</td>
+                                    <td className="pr-4">Email:</td>
+                                    <td>codocacademy@gmail.com</td>
                                 </tr>
                                 <tr>
-                                    <td className="pr-4">Sat - Sun:</td>
-                                    <td>8am - 1am</td>
+                                    <td className="pr-4">Website:</td>
+                                    <td>www.codocacademy.com</td>
                                 </tr>
                             </tbody>
                         </table>

@@ -36,7 +36,7 @@ const ContactUs = () => {
             //const data = await response.json();
 
             setSuccess(true);
-            
+
             setFirstName('');
             setLastName('');
             setEmail('');
@@ -101,7 +101,7 @@ const ContactUs = () => {
                                 </div>
 
                                 <div className="col-md-6 form-group mb-4">
-                                    <label htmlFor="company" className="col-form-label">Company (If applicable)</label>
+                                    <label htmlFor="company" className="col-form-label">Group/Company (If applicable)</label>
                                     <input type="text"
                                         className="form-control"
                                         name="company"
@@ -162,19 +162,19 @@ const ContactUs = () => {
                 <div className="col-md-4 bg-ultramarine text-white rounded px-3">
                     <div className="contact-info h-100 pt-2">
                         <h3>Contact Information</h3>
-                        <p className="mb-4">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Molestias, magnam!</p>
+                        <p className="mb-4">Please contact us for any problems or inquiries about the application. We will try to get back to you as soon as possible.</p>
                         <ul className="list-unstyled">
-                            <li className="d-flex mb-2">
+                            {/* <li className="d-flex mb-2">
                                 <MdLocationOn size={20} className="me-2" />
                                 <span>9757 Aspen Lane South Richmond Hill, NY 11419</span>
                             </li>
                             <li className="d-flex mb-2">
                                 <MdPhone size={20} className="me-2" />
                                 <span>+1 (291) 939 9321</span>
-                            </li>
+                            </li> */}
                             <li className="d-flex mb-2">
                                 <MdEmail size={20} className="me-2" />
-                                <span>info@mywebsite.com</span>
+                                <span>codocacademy@gmail.com</span>
                             </li>
 
                         </ul>
