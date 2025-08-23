@@ -96,7 +96,7 @@ const UserDashboard = () => {
             });
 
             if (!response.ok) throw new Error("Failed to fetch specialty info");
-            
+
 
             const data = await response.json();
             navigate(`/user/${encodeURIComponent(specialtyName)}/info`, {
@@ -157,8 +157,8 @@ const UserDashboard = () => {
                 <div
                     className={`cardHover card text-center w-100 h-100
                          ${section == "Recently Viewed"
-                             ? 'bg-celeste text-dark' 
-                             : 'bg-ultramarine text-white'}`}
+                            ? 'bg-celeste text-dark'
+                            : 'bg-ultramarine text-white'}`}
                     style={{ borderRadius: '10px' }}
                 >
                     <div className="card-body d-flex align-items-center justify-content-center fw-semibold fs-4 w-100">
@@ -183,23 +183,37 @@ const UserDashboard = () => {
             {/* Header */}
             <div className="text-center mb-8">
                 <h1 className="fw-bold text-darkFuschia mb-5">{userId.firstName}'s Dashboard</h1>
+                <p className="text-gray-400 fst-italic text-center mb-2">
+                    Scroll Horizontally to view more specialties
+                </p>
 
                 {/* Tags Row */}
                 <div className="relative w-full my-4 overflow-hidden">
+                    {/* <p
+                        className="text-gray-400 fst-italic"
+                        style={{
+                            position: "fixed",
+                            top: "20px",      
+                            left: "50%",
+                            transform: "translateX(-50%)",
+                            zIndex: 50,
+                        }}
+                    >
+                        Scroll Horizontally to view more specialties
+                    </p> */}
                     <div className="relative w-full overflow-hidden">
                         <div
                             className="flex flex-nowrap overflow-x-auto no-scrollbar px-2 py-2 space-x-3"
                             style={{ scrollBehavior: 'smooth' }}
                         >
-                            <p> Scroll Horizontally to view more specialties</p>
                             {specialties.map((tag, index) => (
                                 <span
                                     key={tag.id}
                                     onClick={() => handleTagClick(tag.name)}
                                     className={`tagHover rounded me-2 cursor-pointer inline-block px-4 py-2 text-sm font-medium rounded-md 
-                                        ${index % 2 === 0 ? 
-                                            'bg-darkFuschia text-white' 
-                                            :'bg-celeste text-black'
+                                        ${index % 2 === 0 ?
+                                            'bg-darkFuschia text-white'
+                                            : 'bg-celeste text-black'
                                         }`}
                                     style={{
                                         whiteSpace: 'nowrap',

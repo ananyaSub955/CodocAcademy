@@ -21,6 +21,7 @@ const MongoStore = require("connect-mongo");
 app.use(express.urlencoded({ extended: true }));
 
 const bcrypt = require("bcryptjs");
+const { data } = require('autoprefixer');
 //const { data } = require('react-router-dom');
 
 const uri = process.env.MONGOURL;
@@ -178,7 +179,7 @@ const userCollection = database.collection("Users");
 const specialitiesCollection = database.collection("Specialties");
 const groupCollection = database.collection("Groups");
 const messageCollection = database.collection("Messages");
-const diabetesCollection = database.collection("Diabetes");
+// const diabetesCollection = database.collection("Diabetes");
 
 const searchDb = searchClient.db("CodocAcademy");
 const diabetesSearchCollection = searchDb.collection("Diabetes");
@@ -186,11 +187,6 @@ const diabetesSearchCollection = searchDb.collection("Diabetes");
 
 
 app.post("/login", async (req, res) => {
-    console.log('=== LOGIN REQUEST ===');
-    console.log('Headers:', req.headers);
-    console.log('Body:', req.body);
-    console.log('Session ID:', req.sessionID);
-    console.log('=====================');
 
     const { email, password } = req.body;
 
@@ -1009,6 +1005,113 @@ app.get('/search', async (req, res) => {
         res.status(500).json({ message: 'Error with search', error: err.message });
     }
 });
+
+// GET /search (or rename to /search/icd-or-subtopic and update your FE)
+app.get('/search', async (req, res) => {
+  try {
+    const q = (req.query.q || '').trim();
+    if (!q) return res.status(400).json({ error: 'Missing query ?q=' });
+
+
+
+    // Normalize query for exact ICD-10 comparison, e.g. "E11.42" -> "E1142"
+    const normalizeICD = (s) => s.toUpperCase().replace(/[.\s-]/g, '');
+    const qICD = normalizeICD(q);
+    const regex = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+
+    // Discover all specialty collections (skip system + "specialties")
+    const allColls = await database.listCollections().toArray();
+    const specialtyCollections = allColls
+      .map(c => c.name)
+      .filter(name => name !== 'specialties' && !name.startsWith('system.'));
+
+    const perCollectionLimit = 10;
+
+    const perCollPromises = specialtyCollections.map(async (coll) => {
+      const pipeline = [
+        // Build a normalized ICD field from "ICD 10"
+        {
+          $addFields: {
+            __icd10_norm: {
+              $replaceAll: {
+                input: {
+                  $replaceAll: {
+                    input: {
+                      $replaceAll: {
+                        input: { $toUpper: { $ifNull: ["$ICD 10", ""] } },
+                        find: ".",
+                        replacement: ""
+                      }
+                    },
+                    find: " ",
+                    replacement: ""
+                  }
+                },
+                find: "-",
+                replacement: ""
+              }
+            }
+          }
+        },
+        {
+          $match: {
+            $or: [
+              { __icd10_norm: qICD },                 // exact normalized ICD match
+              { "ICD 10": { $regex: regex } },        // partial ICD text match
+              { SubTopics: { $regex: regex } }        // partial SubTopics match
+            ]
+          }
+        },
+        {
+          $project: {
+            _id: 1,
+            SubTopics: 1,
+            Category: 1,
+            Subcategory: 1,
+            "ICD 10": 1,
+            "Clinical tip": 1,
+            "Coding/Documentation tip": 1,
+            __icd10_norm: 1 // <-- keep it so we can classify on the server
+          }
+        },
+        { $limit: perCollectionLimit }
+      ];
+
+      const docs = await database.collection(coll).aggregate(pipeline).toArray();
+
+      return docs.map(d => {
+        const isExactICD = d.__icd10_norm && d.__icd10_norm === qICD;
+        return {
+          type: isExactICD ? "icd10" : "subtopic",
+          collection: coll,
+          _id: d._id,
+          title: d.SubTopics || d["ICD 10"] || "(untitled)",
+          snippet: d["ICD 10"] ? `ICD-10: ${d["ICD 10"]}` : "",
+          extra: {
+            Category: d.Category || null,
+            Subcategory: d.Subcategory || null,
+            SubTopics: d.SubTopics || null,
+            ICD10: d["ICD 10"] || null,
+            ClinicalTip: d["Clinical tip"] || null,
+            CodingTip: d["Coding/Documentation tip"] || null
+          }
+        };
+      });
+    });
+
+    let results = (await Promise.all(perCollPromises)).flat();
+
+    // Prioritize exact ICD matches first
+    results.sort((a, b) => (a.type === "icd10" ? -1 : 1) - (b.type === "icd10" ? -1 : 1));
+
+    res.json({ query: q, total: results.length, results });
+  } catch (err) {
+    console.error("Search error:", err);
+    res.status(500).json({ error: "Search failed" });
+  }
+});
+
+
 
 
 app.get('/health', (_req, res) => res.send("ok"));

@@ -37,7 +37,7 @@ const SignUpPlans = () => {
                         </ul>
 
                         <button
-                            className="btn btn-darkFuschia fs-2 p-3 mt-2"
+                            className="btn btn-darkFuschia fs-4 p-3 mt-2"
                             onClick={() => navigate('/groupSignUpChoice')}
                         >
                             Create/Join Group <i className="fas fa-chevron-right"></i>
@@ -72,7 +72,7 @@ const SignUpPlans = () => {
                         </ul>
 
                         <button
-                            className="btn btn-darkFuschia fs-2 p-3 mt-2"
+                            className="btn btn-darkFuschia fs-4 p-3 mt-2"
                             onClick={() => navigate('/individualSignUp')}
                         >
                             Create Account <i className="fas fa-chevron-right"></i>

@@ -1,6 +1,7 @@
 import React from 'react';
 import logo from '../../assets/logo.png';
 import { NavLink, useNavigate } from 'react-router-dom';
+import SearchBar from '../../components/SearchBar';
 
 const url = window.location.hostname === "localhost"
     ? "http://localhost:5000"
@@ -8,7 +9,7 @@ const url = window.location.hostname === "localhost"
 
 const UserNavbar = () => {
     const navigate = useNavigate();
-    
+
 
     const logoutUser = async () => {
         try {
@@ -46,6 +47,9 @@ const UserNavbar = () => {
 
             {/* Collapsible Nav */}
             <div className="collapse navbar-collapse mb-2" id="navbarUserLinks">
+                {/* <div className="ms-3">
+                    <SearchBar />
+                </div> */}
                 <ul className="navbar-nav ms-auto fs-5 gap-2">
                     <li className="nav-item">
                         <NavLink className="nav-link rounded px-4 loginHover me-2" to="/user/dashboard">Dashboard</NavLink>
