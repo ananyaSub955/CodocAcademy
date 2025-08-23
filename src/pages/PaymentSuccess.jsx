@@ -124,7 +124,7 @@ const PaymentSuccess = () => {
               >
                 Verify</button>
             {error && <p className="text-danger mt-2">{error}</p>}
-            <p className='text-danger mt-3' style={{ overflowWrap: 'break-word' }}>The authentication key may not appear to work, but please log in. Your account has been created successfully. The software is currently being modified</p>
+            {/* <p className='text-danger mt-3' style={{ overflowWrap: 'break-word' }}>The authentication key may not appear to work, but please log in. Your account has been created successfully. The software is currently being modified</p> */}
           </div>
         </div>
       )}

@@ -26,12 +26,6 @@ const JoinGroup = () => {
             alert("Please fill in all fields.");
             return;
         }
-
-        // if (!result.valid) {
-        //     setError(result.errors);
-        //     return;
-        // }
-
         try {
             const response = await fetch(`${url}/joinGroup`, {
                 method: "POST",
@@ -39,13 +33,14 @@ const JoinGroup = () => {
                 body: JSON.stringify({ firstName, lastName, email, password, code }),
                 credentials: "include",
             });
-
             const data = await response.json();
-            console.log("Response data:", data);
-
             if (response.ok) {
-                alert(data.message);
-                navigate("/user/dashboard");
+                // 👇 go to 2FA setup page instead of dashboard
+                if (data.requires2FA) {
+                    navigate("/continueDashboard");
+                } else {
+                    navigate("/user/dashboard");
+                }
             } else {
                 setError(data.message);
             }
@@ -54,6 +49,7 @@ const JoinGroup = () => {
             setError("An error occurred while signing up.");
         }
     };
+
 
     const result = validatePassword(password);
 
