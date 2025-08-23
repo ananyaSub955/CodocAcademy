@@ -280,15 +280,15 @@ app.post("/individualSignup", async (req, res) => {
         };
 
         //LIVE DEV ==============================
-        // const priceId = frequency === "yearly"
-        //     ? 'price_1RykDGGFIwTWAvcX0qxlQaLM' //yearly
-        //     : 'price_1RykDGGFIwTWAvcXNiCTfOoz'; //monthly
+        const priceId = frequency === "yearly"
+            ? 'price_1RykDGGFIwTWAvcX0qxlQaLM' //yearly
+            : 'price_1RykDGGFIwTWAvcXNiCTfOoz'; //monthly
 
 
         //TESTING ==============================
-        const priceId = frequency === "yearly"
-            ? 'price_1RyleN7zM3Arj80OsM2BLOlH' //yearly
-            : 'price_1RyleN7zM3Arj80Ohoin6u2c'; //monthly
+        // const priceId = frequency === "yearly"
+        //     ? 'price_1RyleN7zM3Arj80OsM2BLOlH' //yearly
+        //     : 'price_1RyleN7zM3Arj80Ohoin6u2c'; //monthly
 
         // const session = await stripe.checkout.sessions.create({
         //     mode: 'subscription',
@@ -458,25 +458,25 @@ app.post("/createGroup", async (req, res) => {
         if (size === "lt10") {
 
             //LIVE DEV ==============================
-            // priceId = frequency === "monthly"
-            //     ? "price_1RykHUGFIwTWAvcXrrXbaHok"
-            //     : "price_1RykHUGFIwTWAvcX4dpVg5zh"; //yearly
+            priceId = frequency === "monthly"
+                ? "price_1RykHUGFIwTWAvcXrrXbaHok"
+                : "price_1RykHUGFIwTWAvcX4dpVg5zh"; //yearly
 
 
             //TESTING ==============================
-            priceId = frequency === "monthly"
-                ? "price_1Rylgq7zM3Arj80OW4C94A8L"
-                : "price_1Rylgq7zM3Arj80OAh8pktX8"; //yearly
+            // priceId = frequency === "monthly"
+            //     ? "price_1Rylgq7zM3Arj80OW4C94A8L"
+            //     : "price_1Rylgq7zM3Arj80OAh8pktX8"; //yearly
         } else {
             //LIVE DEV ==============================
-            // priceId = frequency === "monthly"
-            //     ? "price_1RykGkGFIwTWAvcXJnigcbSx"
-            //     : "price_1RykGkGFIwTWAvcXUXR1SHB2"; //yearly
+            priceId = frequency === "monthly"
+                ? "price_1RykGkGFIwTWAvcXJnigcbSx"
+                : "price_1RykGkGFIwTWAvcXUXR1SHB2"; //yearly
 
             //TESTING ==============================
-            priceId = frequency === "monthly"
-                ? "price_1Rylfp7zM3Arj80Og1Lj8rvH"
-                : "price_1Rylfp7zM3Arj80Og1Lj8rvH"; //yearly
+            // priceId = frequency === "monthly"
+            //     ? "price_1Rylfp7zM3Arj80Og1Lj8rvH"
+            //     : "price_1Rylfp7zM3Arj80Og1Lj8rvH"; //yearly
         }
 
         req.session.pendingSignup = {
