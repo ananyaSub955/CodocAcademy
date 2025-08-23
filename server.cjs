@@ -387,8 +387,9 @@ app.post("/joinGroup", async (req, res) => {
         };
         req.session.userId = newUser.insertedId.toString(); // ✅ this is needed
 
+        req.session.require2FA = true;
 
-        res.status(201).json({ message: "Signup successful!" });
+        res.status(201).json({ message: "Signup successful!", requires2FA: true });
     } catch (error) {
         res.status(500).json({ message: "Error signing up", error: error.message });
     }
@@ -665,28 +666,29 @@ app.get('/get2FA', async (req, res) => {
 });
 
 app.post('/verifyToken', async (req, res) => {
+  try {
     const { token, tempUserId } = req.body;
-    
     const uid = tempUserId || req.session.userId;
-    if (!uid) {
-        return res.status(401).json({ verified: false, message: 'Missing user context' });
+    if (!uid) return res.status(401).json({ verified: false, message: 'Missing user context' });
+
+    const user = await userCollection.findOne({ _id: new ObjectId(uid) });
+    if (!user || !user.twoFA?.enabled) {
+      return res.status(400).json({ verified: false, message: '2FA not set up' });
     }
 
-    const user = await userCollection.findOne({ _id: new ObjectId(tempUserId) });
-    if (!user || !user.twoFA?.enabled) return res.status(400).json({ verified: false });
+    const verified = speakeasy.totp.verify({
+      secret: user.twoFA.secret,
+      encoding: 'base32',
+      token: String(token || '').trim(),
+      window: 1
+    });
 
+    if (!verified) return res.json({ verified: false });
 
-  const verified = speakeasy.totp.verify({
-    secret: user.twoFA.secret,
-    encoding: 'base32',
-    token,
-    window: 1
-  });
-
-  if (verified) {
+    // ✅ mark 2FA complete for this session
     req.session.userId = user._id.toString();
+    req.session.require2FA = false;
 
-    // ✅ include role flags so the client can route immediately
     return res.json({
       verified: true,
       individualUser: user.individualUser || false,
@@ -694,9 +696,12 @@ app.post('/verifyToken', async (req, res) => {
       groupLeader: user.groupLeader || false,
       superAdmin: user.superAdmin || false
     });
+  } catch (e) {
+    console.error('verifyToken error:', e);
+    return res.status(500).json({ verified: false, message: 'Server error' });
   }
-  res.json({ verified: false });
 });
+
 
 
 

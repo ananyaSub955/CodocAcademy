@@ -27,6 +27,7 @@ import SuperAdminLayout from './SuperAdmin/layout/SuperAdminLayout.jsx';
 import SuperAdminDashboard from './SuperAdmin/SuperAdminDashboard.jsx';
 import GroupMembers from './SuperAdmin/components/GroupMembers.jsx';
 import ContactUs from './pages/ContactUs.jsx';
+import ContinueDashboard from './pages/ContinueDashboard.jsx';
 
 const App = () => {
   const router = createBrowserRouter(
@@ -46,6 +47,7 @@ const App = () => {
           <Route path='subscription' element={<SubscriptionPage />} />
           <Route path='cancel' element={<Cancel />} />
           <Route path ='contact' element={<ContactUs/>} />
+          <Route path ='continueDashboard' element={<ContinueDashboard/>} />
           
           < Route path='*' element={<NotFound />} />
         </Route>
