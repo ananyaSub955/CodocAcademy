@@ -52,11 +52,11 @@ const Footer = () => {
                             <tbody>
                                 <tr>
                                     <td className="pr-4">Email:</td>
-                                    <td>codocacademy@gmail.com</td>
+                                    <td ><a className='text-white' href="mailto:codocacademy@gmail.com">codocacademy@gmail.com</a></td>
                                 </tr>
                                 <tr>
                                     <td className="pr-4">Website:</td>
-                                    <td>www.codocacademy.com</td>
+                                    <td><a className='text-white' href="https://www.codocacademy.com/" target='_blank'>www.codocacademy.com</a></td>
                                 </tr>
                             </tbody>
                         </table>

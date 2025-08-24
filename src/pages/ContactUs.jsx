@@ -174,7 +174,7 @@ const ContactUs = () => {
                             </li> */}
                             <li className="d-flex mb-2">
                                 <MdEmail size={20} className="me-2" />
-                                <span>codocacademy@gmail.com</span>
+                                <span><a className='text-white' href="mailto:codocacademy@gmail.com">codocacademy@gmail.com</a></span>
                             </li>
 
                         </ul>
