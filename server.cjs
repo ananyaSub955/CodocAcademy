@@ -262,6 +262,7 @@ app.post("/individualSignup", async (req, res) => {
             payment_method_types: ['card'],
             customer_email: email,
             line_items: [{ price: priceId, quantity: 1 }],
+            allow_promotion_codes: true,
             success_url: successUrl,
             cancel_url: cancelUrl,
         });
@@ -400,8 +401,9 @@ app.post("/createGroup", async (req, res) => {
             line_items: [{
                 price: priceId,
                 quantity: groupSize,
-                adjustable_quantity: { enabled: false }
+                adjustable_quantity: { enabled: false },
             }],
+            allow_promotion_codes: true,
             subscription_data: {
                 // keep this for your 10¢/5¢ pricing so invoices wait until ≥ $0.50
                 //billing_thresholds: { amount_gte: 50 },
