@@ -242,15 +242,15 @@ app.post("/individualSignup", async (req, res) => {
         };
 
         //LIVE DEV ==============================
-        // const priceId = frequency === "yearly"
-        //     ? 'price_1RykDGGFIwTWAvcX0qxlQaLM' //yearly
-        //     : 'price_1RykDGGFIwTWAvcXNiCTfOoz'; //monthly
+        const priceId = frequency === "yearly"
+            ? 'price_1RzSVNGFIwTWAvcXxNAZ3TS4' //yearly
+            : 'price_1RzSVNGFIwTWAvcXTEvUsNYN'; //monthly
 
 
         //TESTING ==============================
-        const priceId = frequency === "yearly"
-            ? 'price_1RzOB27zM3Arj80O3ZM1to4D' //yearly
-            : 'price_1RzOAZ7zM3Arj80OnZb86LSm'; //monthly
+        // const priceId = frequency === "yearly"
+        //     ? 'price_1RzOB27zM3Arj80O3ZM1to4D' //yearly
+        //     : 'price_1RzOAZ7zM3Arj80OnZb86LSm'; //monthly
 
 
         const origin = getClientOrigin(req);
@@ -367,9 +367,16 @@ app.post("/createGroup", async (req, res) => {
         }
 
         // TEST price IDs
+        // const priceIds = {
+        //     monthly: "price_1RzOKh7zM3Arj80O9FJtCCIO",
+        //     yearly: "price_1RzOKh7zM3Arj80OxpToW3r8",
+        // };
+
+
+        // LIVE price IDs
         const priceIds = {
-            monthly: "price_1RzOKh7zM3Arj80O9FJtCCIO",
-            yearly: "price_1RzOKh7zM3Arj80OxpToW3r8",
+            monthly: "price_1RzSUsGFIwTWAvcXpOS3JHHi",
+            yearly: "price_1RzSUsGFIwTWAvcXgHowoyVR",
         };
         const priceId = priceIds[planFreq];
 
