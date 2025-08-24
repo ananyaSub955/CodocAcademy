@@ -9,6 +9,9 @@ const GroupAdminDashboard = () => {
   const [members, setMembers] = useState([]);
   const [group, setGroup] = useState(null)
   const [groupCode, setGroupCode] = useState("");
+  const [size, setSize] = useState(0);
+  const [spotsUsed, setSeatsUsed] = useState(0);
+
 
   useEffect(() => {
     fetch(`${url}/session`, { credentials: "include" })
@@ -31,6 +34,8 @@ const GroupAdminDashboard = () => {
       setMembers(data.members || []);
       //console.log(members);
       setGroup(data);
+      setSize(data.groupSize || 0);
+      setSeatsUsed(data.members ? data.members.length : 0);
     };
 
     if (groupCode) fetchGroup();
@@ -73,24 +78,28 @@ const GroupAdminDashboard = () => {
           ) : (
             members.map((member, index) => (
               <MemberCard
-                key={member._id}
+                key={member.id}
                 member={member}
                 onRemove={removeMember}
-                className={index % 2 === 0 ? "bg-deepTeal text-white" : "bg-celeste"} 
+                className={index % 2 === 0 ? "bg-deepTeal text-white" : "bg-celeste"}
               />
             ))
           )}
 
-          {members.length >= 10 && (
-          <p className="text-danger mt-4">
-            You have reached the maximum number of members under your current plan.
-          </p>
-        )}
+          {members.length >=  size  && (
+            <p className="text-danger mt-4 fs-5">
+              You have reached the maximum number of members under your current plan.
+            </p>
+          )}
 
         </>
       )}
 
-      <h3 className='my-4 border border-black p-2'> Current Code: <strong>{groupCode}</strong></h3>
+      <h2 className='my-4 border border-burgundy p-2 text-burgundy'> Current Code: <strong>{groupCode}</strong></h2>
+
+      <h2 className='my-4 border border-burgundy p-2 text-burgundy'> Group Max Size: <strong>{size}</strong></h2>
+
+      <h2 className='my-4 border border-burgundy p-2 text-burgundy'> Seats Used: <strong>{spotsUsed}</strong></h2>
 
     </div>
   );
