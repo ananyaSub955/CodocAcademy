@@ -18,7 +18,7 @@ const CreateGroup = () => {
     const [code, setCode] = useState('');
     const [error, setError] = useState('');
     const [frequency, setFrequency] = useState('monthly');
-    const [size, setSize] = useState('lt10');
+    const [size, setSize] = useState('');
 
 
 
@@ -36,11 +36,12 @@ const CreateGroup = () => {
             const response = await fetch(`${url}/createGroup`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ groupName, email, password, code, frequency, groupSize: size }),
+                body: JSON.stringify({ groupName, email, password, code, frequency, size }),
                 credentials: "include",
             });
 
             const data = await response.json();
+            console.log(data);
             if (response.ok && data.url) {
                 window.location.href = data.url; // Stripe checkout
             } else {
@@ -153,7 +154,7 @@ const CreateGroup = () => {
 
                     <hr className='border-t-2' />
 
-                    <div className="mb-3 mt-3">
+                    {/* <div className="mb-3 mt-3">
                         <label htmlFor="size" className="form-label"><b>Group Size:</b></label>
                         <select
                             id="size"
@@ -164,6 +165,21 @@ const CreateGroup = () => {
                             <option value="lt10">Less than 10 members</option>
                             <option value="gt10">10 or more members</option>
                         </select>
+                    </div> */}
+
+                    <div className="mb-3 mt-3">
+                        <label htmlFor="size" className="form-label"> <b>Group Size:</b></label>
+                        <input
+                            type="number"
+                            min="1"
+                            className="bg-lightBlue form-control"
+                            id="size"
+                            placeholder="Enter Group Size"
+                            name="size"
+                            value={size}
+                            onChange={(e) => setSize(e.target.value)}
+                            required
+                        />
                     </div>
 
 

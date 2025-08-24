@@ -235,44 +235,6 @@ app.post("/individualSignup", async (req, res) => {
             return res.status(400).json({ message: "Email already in use" });
         }
 
-        // const lastUser = await userCollection.find().sort({ id: -1 }).limit(1).toArray();
-        // const newId = lastUser.length > 0 ? lastUser[0].id + 1 : 1;
-
-        // // Hash password
-        // const hashedPassword = await bcrypt.hash(password, 10);
-
-        // // Create new user
-        // const newUser = await userCollection.insertOne({
-        //     id: newId,
-        //     firstName,
-        //     lastName,
-        //     email,
-        //     password: hashedPassword,
-        //     inGroup: false,
-        //     groupLeader: false,
-        //     individualUser: true,
-        //     superAdmin: false,
-        //     bookmarks: [],
-        //     recientlyViewed: [],
-        //     code: null
-        // });
-
-        // Store user information in session
-        // req.session.user = {
-        //     id: newId,
-        //     email,
-        //     firstName,
-        //     lastName,
-        //     inGroup: false,
-        //     groupLeader: false,
-        //     individualUser: true,
-        //     superAdmin: false,
-        // };
-        // req.session.userId = newUser.insertedId.toString(); // ✅ this is needed
-
-
-        // res.status(201).json({ message: "Signup successful!" });
-
         req.session.pendingSignup = {
             type: "individual",
             formData: { firstName, lastName, email, password },
@@ -280,24 +242,16 @@ app.post("/individualSignup", async (req, res) => {
         };
 
         //LIVE DEV ==============================
-        const priceId = frequency === "yearly"
-            ? 'price_1RykDGGFIwTWAvcX0qxlQaLM' //yearly
-            : 'price_1RykDGGFIwTWAvcXNiCTfOoz'; //monthly
+        // const priceId = frequency === "yearly"
+        //     ? 'price_1RykDGGFIwTWAvcX0qxlQaLM' //yearly
+        //     : 'price_1RykDGGFIwTWAvcXNiCTfOoz'; //monthly
 
 
         //TESTING ==============================
-        // const priceId = frequency === "yearly"
-        //     ? 'price_1RyleN7zM3Arj80OsM2BLOlH' //yearly
-        //     : 'price_1RyleN7zM3Arj80Ohoin6u2c'; //monthly
+        const priceId = frequency === "yearly"
+            ? 'price_1RzOB27zM3Arj80O3ZM1to4D' //yearly
+            : 'price_1RzOAZ7zM3Arj80OnZb86LSm'; //monthly
 
-        // const session = await stripe.checkout.sessions.create({
-        //     mode: 'subscription',
-        //     payment_method_types: ['card'],
-        //     customer_email: email,
-        //     line_items: [{ price: priceId, quantity: 1 }],
-        //     success_url: `${baseUrl}/success`,
-        //     cancel_url: `${baseUrl}/cancel`,
-        // });
 
         const origin = getClientOrigin(req);
         const successUrl = joinUrl(origin, '/success');
@@ -328,11 +282,10 @@ app.post("/joinGroup", async (req, res) => {
             return res.status(400).json({ message: "Invalid group code" });
         }
 
-        if (
-            group.members.length >= 10 &&
-            (group.plan == "group_lt10_yearly" || group.plan == "group_lt10_monthly")) {
-            return res.status(400).json({ message: "Group has exceeded member limit" });
+        if ((group.seatsUsed ?? (group.members?.length || 0)) >= group.groupSize) {
+            return res.status(403).json({ message: "Seat limit reached" });
         }
+
 
         // Check if user already exists
         const existingUser = await userCollection.findOne({ email });
@@ -396,127 +349,84 @@ app.post("/joinGroup", async (req, res) => {
 });
 
 app.post("/createGroup", async (req, res) => {
-
     try {
-        const { groupName, email, password, code, frequency, groupSize } = req.body;
+        const { groupName, email, password, code, frequency, size } = req.body;
 
-        const size = groupSize;
-
-        // const existingGroup = await groupCollection.findOne({ code });
-        // if (existingGroup) return res.status(400).json({ message: "Code already in use" });
-
-        // const existingUser = await userCollection.findOne({ email });
-        // if (existingUser) return res.status(400).json({ message: "Email already used as user" });
-
-        // const lastGroup = await groupCollection.find().sort({ id: -1 }).limit(1).toArray();
-        // const newId = lastGroup.length > 0 ? lastGroup[0].id + 1 : 1;
-
-        // const lastUser = await userCollection.find().sort({ id: -1 }).limit(1).toArray();
-        // const newUserId = lastUser.length > 0 ? lastUser[0].id + 1 : 1;
-
-        // const hashedPassword = await bcrypt.hash(password, 10);
-
-        // const newGroup = await groupCollection.insertOne({
-        //     id: newId,
-        //     groupName,
-        //     email,
-        //     password: hashedPassword,
-        //     code,
-        //     members: []
-        // });
-
-        // const result = await userCollection.insertOne({
-        //     id: newUserId,
-        //     email,
-        //     password: hashedPassword,
-        //     firstName: groupName,
-        //     lastName: "Admin",
-        //     inGroup: true,
-        //     groupLeader: true,
-        //     individualUser: false,
-        //     superAdmin: false,
-        //     code: code
-        // });
-
-        // req.session.user = {
-        //     id: newUserId,
-        //     email,
-        //     groupLeader: true,
-        //     inGroup: true,
-        //     individualUser: false,
-        //     superAdmin: false,
-        //     code: code,
-        // };
-
-        // req.session.userId = result.insertedId.toString(); // ✅ this is what /session reads
-
-
-        // //req.session.userId = newGroup.insertedId.toString();
-        // res.status(201).json({ message: "Group creation successful!", code });
-
-        let priceId;
-        if (size === "lt10") {
-
-            //LIVE DEV ==============================
-            priceId = frequency === "monthly"
-                ? "price_1RykHUGFIwTWAvcXrrXbaHok"
-                : "price_1RykHUGFIwTWAvcX4dpVg5zh"; //yearly
-
-
-            //TESTING ==============================
-            // priceId = frequency === "monthly"
-            //     ? "price_1Rylgq7zM3Arj80OW4C94A8L"
-            //     : "price_1Rylgq7zM3Arj80OAh8pktX8"; //yearly
-        } else {
-            //LIVE DEV ==============================
-            priceId = frequency === "monthly"
-                ? "price_1RykGkGFIwTWAvcXJnigcbSx"
-                : "price_1RykGkGFIwTWAvcXUXR1SHB2"; //yearly
-
-            //TESTING ==============================
-            // priceId = frequency === "monthly"
-            //     ? "price_1Rylfp7zM3Arj80Og1Lj8rvH"
-            //     : "price_1Rylfp7zM3Arj80Og1Lj8rvH"; //yearly
+        if (!groupName || !email || !password || !code || !frequency || size == null) {
+            return res.status(400).json({ message: "Missing required fields." });
         }
+
+        const groupSize = Math.max(1, Math.min(10000, parseInt(size, 10) || 0));
+        if (!Number.isInteger(groupSize) || groupSize < 1) {
+            return res.status(400).json({ message: "Invalid group size." });
+        }
+
+        const planFreq = String(frequency).toLowerCase();
+        if (!["monthly", "yearly"].includes(planFreq)) {
+            return res.status(400).json({ message: "Invalid frequency." });
+        }
+
+        // TEST price IDs
+        const priceIds = {
+            monthly: "price_1RzOKh7zM3Arj80O9FJtCCIO",
+            yearly: "price_1RzOKh7zM3Arj80OxpToW3r8",
+        };
+        const priceId = priceIds[planFreq];
+
+        //const planLabel = `group_${groupSize}_${planFreq}`;
 
         req.session.pendingSignup = {
             type: "group",
-            formData: { groupName, email, password, code },
-            frequency,
-            size: groupSize
+            size: groupSize,
+            formData: { groupName, email, password, code, size: groupSize },
+            frequency: planFreq,
         };
 
-        // const session = await stripe.checkout.sessions.create({
-        //     mode: 'subscription',
-        //     payment_method_types: ['card'],
-        //     customer_email: email,
-        //     line_items: [{ price: priceId, quantity: 1 }],
-        //     success_url: `${baseUrl}/success`,
-        //     cancel_url: `${baseUrl}/cancel`,
-        // });
-
         const origin = getClientOrigin(req);
-        const successUrl = joinUrl(origin, '/success');
+        const successUrl = joinUrl(origin, '/success?session_id={CHECKOUT_SESSION_ID}');
         const cancelUrl = joinUrl(origin, '/cancel');
 
         const session = await stripe.checkout.sessions.create({
             mode: 'subscription',
-            payment_method_types: ['card'],
             customer_email: email,
-            line_items: [{ price: priceId, quantity: 1 }],
+            payment_method_types: ['card'],
+            line_items: [{
+                price: priceId,
+                quantity: groupSize,
+                adjustable_quantity: { enabled: false }
+            }],
+            subscription_data: {
+                // keep this for your 10¢/5¢ pricing so invoices wait until ≥ $0.50
+                //billing_thresholds: { amount_gte: 50 },
+                metadata: {
+                    signupType: "group",
+                    groupName,
+                    code,
+                    frequency: planFreq,
+                    //planLabel,                    
+                    groupSize: String(groupSize),
+                    userEmail: email,
+                },
+            },
+            metadata: {
+                signupType: "group",
+                groupName,
+                code,
+                frequency: planFreq,            // <-- was `plan` (undefined)
+                //planLabel,                      
+                groupSize: String(groupSize),
+            },
             success_url: successUrl,
             cancel_url: cancelUrl,
         });
 
         res.json({ url: session.url });
-
-
     } catch (error) {
+        console.error("createGroup error:", error); // <— log the real reason
         res.status(500).json({ message: "Error signing up", error: error.message });
-
     }
-
 });
+
 
 app.get("/generateGroupCode", async (req, res) => {
     const generateCode = async () => {
@@ -557,7 +467,10 @@ app.post("/finalizeSignup", async (req, res) => {
 
     const lastUser = await userCollection.find().sort({ id: -1 }).limit(1).toArray();
     const newUserId = lastUser.length > 0 ? lastUser[0].id + 1 : 1;
+
     const hashedPassword = await bcrypt.hash(formData.password, 10);
+
+    const groupSize = Number(req.session?.pendingSignup?.formData?.size) || 1;
 
     if (type === "individual") {
         const twoFA = getTwoFA(false);
@@ -592,6 +505,7 @@ app.post("/finalizeSignup", async (req, res) => {
         req.session.userId = user._id.toString();
     } else if (type === "group") {
         await groupCollection.insertOne({
+            id: newId,
             groupName: formData.groupName,
             email: formData.email,
             password: hashedPassword,
@@ -599,11 +513,13 @@ app.post("/finalizeSignup", async (req, res) => {
             members: [],
             hasPaid: true,
             plan,
+            groupSize,
         });
 
         const twoFA = getTwoFA(false);
 
         await userCollection.insertOne({
+            id: newUserId,
             email: formData.email,
             password: hashedPassword,
             firstName: formData.groupName,
@@ -666,40 +582,40 @@ app.get('/get2FA', async (req, res) => {
 });
 
 app.post('/verifyToken', async (req, res) => {
-  try {
-    const { token, tempUserId } = req.body;
-    const uid = tempUserId || req.session.userId;
-    if (!uid) return res.status(401).json({ verified: false, message: 'Missing user context' });
+    try {
+        const { token, tempUserId } = req.body;
+        const uid = tempUserId || req.session.userId;
+        if (!uid) return res.status(401).json({ verified: false, message: 'Missing user context' });
 
-    const user = await userCollection.findOne({ _id: new ObjectId(uid) });
-    if (!user || !user.twoFA?.enabled) {
-      return res.status(400).json({ verified: false, message: '2FA not set up' });
+        const user = await userCollection.findOne({ _id: new ObjectId(uid) });
+        if (!user || !user.twoFA?.enabled) {
+            return res.status(400).json({ verified: false, message: '2FA not set up' });
+        }
+
+        const verified = speakeasy.totp.verify({
+            secret: user.twoFA.secret,
+            encoding: 'base32',
+            token: String(token || '').trim(),
+            window: 1
+        });
+
+        if (!verified) return res.json({ verified: false });
+
+        // ✅ mark 2FA complete for this session
+        req.session.userId = user._id.toString();
+        req.session.require2FA = false;
+
+        return res.json({
+            verified: true,
+            individualUser: user.individualUser || false,
+            inGroup: user.inGroup || false,
+            groupLeader: user.groupLeader || false,
+            superAdmin: user.superAdmin || false
+        });
+    } catch (e) {
+        console.error('verifyToken error:', e);
+        return res.status(500).json({ verified: false, message: 'Server error' });
     }
-
-    const verified = speakeasy.totp.verify({
-      secret: user.twoFA.secret,
-      encoding: 'base32',
-      token: String(token || '').trim(),
-      window: 1
-    });
-
-    if (!verified) return res.json({ verified: false });
-
-    // ✅ mark 2FA complete for this session
-    req.session.userId = user._id.toString();
-    req.session.require2FA = false;
-
-    return res.json({
-      verified: true,
-      individualUser: user.individualUser || false,
-      inGroup: user.inGroup || false,
-      groupLeader: user.groupLeader || false,
-      superAdmin: user.superAdmin || false
-    });
-  } catch (e) {
-    console.error('verifyToken error:', e);
-    return res.status(500).json({ verified: false, message: 'Server error' });
-  }
 });
 
 
@@ -894,12 +810,12 @@ app.get('/groups', async (req, res) => {
 });
 
 app.get('/group/:code', async (req, res) => {
-    // console.log("GET /group/:code called");
-    // console.log("Params:", req.params);
-    try {
-        //console.log(req.params.code);
-        const group = await groupCollection.findOne({ code: req.params.code });
 
+    try {
+        const group = await groupCollection.findOne(
+            { code: req.params.code },
+            { projection: { password: 0 } }
+        );
         if (!group) return res.status(404).json({ message: "Group not found" });
 
         // console.log("Raw group members:", group.members);
@@ -907,11 +823,13 @@ app.get('/group/:code', async (req, res) => {
         // Populate members with user data
         const memberIds = group.members;
         const members = await userCollection.find({ id: { $in: memberIds } }).toArray();
-        //console.log(members);
 
 
+        const groupSize = group.groupSize || 0;
+        const spotsUsed = group.spotsUsed ?? members.length;
+        const spotsAvailable = Math.max(0, groupSize - spotsUsed);
 
-        res.json({ ...group, members });
+        res.json({ ...group, members, groupSize, spotsUsed, spotsAvailable });
     } catch (err) {
         res.status(500).json({ message: "Error fetching group", error: err.message });
     }
@@ -925,12 +843,10 @@ app.post('/group/:code/removeMember', async (req, res) => {
         const group = await groupCollection.findOne({ code: req.params.code });
         if (!group) return res.status(404).json({ message: "Group not found" });
 
-        //const numericId = parseInt(memberId);
-
 
         await groupCollection.updateOne(
             { code: req.params.code },
-            { $pull: { members: numId } }
+            { $pull: { members: numId }, $inc: { spotsUsed: -1 } }
         );
 
         await userCollection.updateOne(
