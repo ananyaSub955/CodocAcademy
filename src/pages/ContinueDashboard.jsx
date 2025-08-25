@@ -48,13 +48,14 @@ const ContinueDashboard = () => {
             setVerified(true);
 
             // route from flags (or fetch /session if you prefer)
-            const path = data.groupLeader
-                ? "/group/dashboard"
-                : data.superAdmin
-                    ? "/superAdmin/dashboard"
-                    : "/user/dashboard";
+            // const path = data.groupLeader
+            //     ? "/group/dashboard"
+            //     : data.superAdmin
+            //         ? "/superAdmin/dashboard"
+            //         : "/user/dashboard";
 
-            setTimeout(() => navigate(path), 1000);
+            // setTimeout(() => navigate(path), 1000);
+            setTimeout(() => navigate("/termsandconditions", { replace: true }), 1200);
         } catch (e) {
             setError("2FA verification failed. Please try again.");
         }
@@ -67,7 +68,7 @@ const ContinueDashboard = () => {
             {verified ? (
                 <div className="text-center mt-5">
                     <h1>✅ 2FA Verified</h1>
-                    <p>Redirecting you to your dashboard...</p>
+                    <p>Redirecting you to our terms and conditions...</p>
                 </div>
             ) : (
                 <div className="text-center mt-5">

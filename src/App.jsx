@@ -13,7 +13,6 @@ import CreateGroup from './pages/CreateGroup.jsx';
 import JoinGroup from './pages/JoinGroup.jsx';
 import TwoFactorSetup from './pages/TwoFactor.jsx';
 import PaymentSuccess from './pages/PaymentSuccess.jsx';
-import SubscriptionPage from './pages/SubscriptionPage.jsx';
 import Cancel from './pages/Cancel.jsx';
 
 import UserLayout from './User/layout/UserLayout.jsx';
@@ -45,7 +44,6 @@ const App = () => {
           <Route path='joinGroup' element={<JoinGroup />} />
           <Route path = 'twoFactor'element = {<TwoFactorSetup />}/>
           <Route path='success' element={<PaymentSuccess />} />
-          <Route path='subscription' element={<SubscriptionPage />} />
           <Route path='cancel' element={<Cancel />} />
           <Route path ='contact' element={<ContactUs/>} />
           <Route path ='continueDashboard' element={<ContinueDashboard/>} />

@@ -17,7 +17,7 @@ const CreateGroup = () => {
     const [password, setPassword] = useState('');
     const [code, setCode] = useState('');
     const [error, setError] = useState('');
-    const [frequency, setFrequency] = useState('monthly');
+    //const [frequency, setFrequency] = useState('monthly');
     const [size, setSize] = useState('');
 
 
@@ -29,14 +29,14 @@ const CreateGroup = () => {
         if (!password) return alert("Please enter a password.");
         if (!code) return alert("Please generate or enter a group code.");
         if (!size) return alert("Please select a group size.");
-        if (!frequency) return alert("Please select a billing frequency.");
+        //if (!frequency) return alert("Please select a billing frequency.");
 
 
         try {
             const response = await fetch(`${url}/createGroup`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ groupName, email, password, code, frequency, size }),
+                body: JSON.stringify({ groupName, email, password, code, size }),
                 credentials: "include",
             });
 
@@ -184,7 +184,8 @@ const CreateGroup = () => {
 
 
                     <div className="mb-3 mt-3">
-                        <label htmlFor="frequency" className="form-label"><b>Billing Frequency:</b></label>
+                        <p> You will be charged <strong> Monthly.</strong></p>
+                        {/* <label htmlFor="frequency" className="form-label"><b>Billing Frequency:</b></label>
                         <select
                             id="frequency"
                             className="bg-lightBlue form-control"
@@ -193,7 +194,7 @@ const CreateGroup = () => {
                         >
                             <option value="monthly">Monthly</option>
                             <option value="yearly">Yearly</option>
-                        </select>
+                        </select> */}
                     </div>
 
                     {error && (
