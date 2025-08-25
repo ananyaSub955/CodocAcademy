@@ -227,7 +227,7 @@ app.post("/login", async (req, res) => {
 app.post("/individualSignup", async (req, res) => {
 
     try {
-        const { firstName, lastName, email, password, frequency } = req.body;
+        const { firstName, lastName, email, password } = req.body;
 
         // Check if user already exists
         const existingUser = await userCollection.findOne({ email });
@@ -237,20 +237,15 @@ app.post("/individualSignup", async (req, res) => {
 
         req.session.pendingSignup = {
             type: "individual",
-            formData: { firstName, lastName, email, password },
-            frequency,
+            formData: { firstName, lastName, email, password }
         };
 
-        //LIVE DEV ==============================
-        // const priceId = frequency === "yearly"
-        //     ? 'price_1RzSVNGFIwTWAvcXxNAZ3TS4' //yearly
-        //     : 'price_1RzSVNGFIwTWAvcXTEvUsNYN'; //monthly
 
+        // //TEST price ID
+        // const priceId = 'price_1RzOAZ7zM3Arj80OnZb86LSm';
 
-        //TESTING ==============================
-        const priceId = frequency === "yearly"
-            ? 'price_1RzOB27zM3Arj80O3ZM1to4D' //yearly
-            : 'price_1RzOAZ7zM3Arj80OnZb86LSm'; //monthly
+        //LIVE price ID
+        const priceId = 'price_1RzqA3GFIwTWAvcXSrjR5TUI';
 
 
         const origin = getClientOrigin(req);
@@ -351,9 +346,9 @@ app.post("/joinGroup", async (req, res) => {
 
 app.post("/createGroup", async (req, res) => {
     try {
-        const { groupName, email, password, code, frequency, size } = req.body;
+        const { groupName, email, password, code, size } = req.body;
 
-        if (!groupName || !email || !password || !code || !frequency || size == null) {
+        if (!groupName || !email || !password || !code || size == null) {
             return res.status(400).json({ message: "Missing required fields." });
         }
 
@@ -362,32 +357,18 @@ app.post("/createGroup", async (req, res) => {
             return res.status(400).json({ message: "Invalid group size." });
         }
 
-        const planFreq = String(frequency).toLowerCase();
-        if (!["monthly", "yearly"].includes(planFreq)) {
-            return res.status(400).json({ message: "Invalid frequency." });
-        }
-
-        // TEST price IDs
-        const priceIds = {
-            monthly: "price_1RzOKh7zM3Arj80O9FJtCCIO",
-            yearly: "price_1RzOKh7zM3Arj80OxpToW3r8",
-        };
+        // //TEST price ID
+        // const priceId = 'price_1RzOKh7zM3Arj80O9FJtCCIO';
 
 
-        // LIVE price IDs
-        // const priceIds = {
-        //     monthly: "price_1RzSUsGFIwTWAvcXpOS3JHHi",
-        //     yearly: "price_1RzSUsGFIwTWAvcXgHowoyVR",
-        // };
-        const priceId = priceIds[planFreq];
+       //LIVE price ID
+        const priceId = 'price_1RzqDmGFIwTWAvcXfPeWGsFA';
 
-        //const planLabel = `group_${groupSize}_${planFreq}`;
 
         req.session.pendingSignup = {
             type: "group",
             size: groupSize,
             formData: { groupName, email, password, code, size: groupSize },
-            frequency: planFreq,
         };
 
         const origin = getClientOrigin(req);
@@ -410,9 +391,7 @@ app.post("/createGroup", async (req, res) => {
                 metadata: {
                     signupType: "group",
                     groupName,
-                    code,
-                    frequency: planFreq,
-                    //planLabel,                    
+                    code,              
                     groupSize: String(groupSize),
                     userEmail: email,
                 },
@@ -420,9 +399,7 @@ app.post("/createGroup", async (req, res) => {
             metadata: {
                 signupType: "group",
                 groupName,
-                code,
-                frequency: planFreq,            // <-- was `plan` (undefined)
-                //planLabel,                      
+                code,                 
                 groupSize: String(groupSize),
             },
             success_url: successUrl,
@@ -457,10 +434,10 @@ app.post("/finalizeSignup", async (req, res) => {
     const signup = req.session.pendingSignup;
     if (!signup) return res.status(400).json({ message: "No pending signup" });
 
-    const { type, frequency, size, formData } = signup;
+    const { type, size, formData } = signup;
     const plan = type === "group"
-        ? `group_${size}_${frequency}`
-        : `individual_${frequency}`;
+        ? `group_${size}`
+        : `individual`;
 
     const existingGroup = formData.code
         ? await groupCollection.findOne({ code: formData.code })

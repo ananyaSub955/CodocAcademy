@@ -19,7 +19,7 @@ const IndividualSignUp = () => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     //const [result, setResult] = useState('');
-    const [frequency, setFrequency] = useState('monthly');
+   // const [frequency, setFrequency] = useState('monthly');
 
 
     const handleSignUp = async (e) => {
@@ -36,7 +36,7 @@ const IndividualSignUp = () => {
             const response = await fetch(`${url}/individualSignup`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ firstName, lastName, email, password, frequency }),
+                body: JSON.stringify({ firstName, lastName, email, password }),
                 credentials: "include",
             });
 
@@ -132,7 +132,8 @@ const IndividualSignUp = () => {
                     </div>
 
                     <div className="mb-3 mt-3">
-                        <label htmlFor="frequency" className="form-label"><b>Billing Frequency:</b></label>
+                        <p> You will be charged <strong> Monthly.</strong></p>
+                        {/* <label htmlFor="frequency" className="form-label"><b>Billing Frequency:</b></label>
                         <select
                             id="frequency"
                             className="bg-lightBlue form-control"
@@ -141,7 +142,7 @@ const IndividualSignUp = () => {
                         >
                             <option value="monthly">Monthly</option>
                             <option value="yearly">Yearly</option>
-                        </select>
+                        </select> */}
                     </div>
 
                      {error && (
