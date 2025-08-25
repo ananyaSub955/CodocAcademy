@@ -6,85 +6,73 @@ const url = window.location.hostname === "localhost"
   ? "http://localhost:5000"
   : "https://ananya.honor-itsolutions.com/node";
 
+const formatSecret = (s) =>
+  (s || "").replace(/\s+/g, "").toUpperCase().match(/.{1,4}/g)?.join(" ") || s;
+
 const PaymentSuccess = () => {
   const navigate = useNavigate();
   const [qrCode, setQrCode] = useState('');
   const [token, setToken] = useState('');
   const [error, setError] = useState('');
   const [verified, setVerified] = useState(false);
+  const [secret, setSecret] = useState('');
+  const [copied, setCopied] = useState(false);
   const [dashboardPath, setDashboardPath] = useState('');
 
   useEffect(() => {
-    fetch(`${url}/finalizeSignup`, {
-      method: "POST",
-      credentials: "include",
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          const path = data.groupLeader ? "/group/dashboard" : "/user/dashboard";
-          setDashboardPath(path);
-          // fetch QR
-          fetch(`${url}/get2FA`, { credentials: "include" })
-            .then(res => res.json())
-            .then(data => {
-              if (data.qrCode) setQrCode(data.qrCode);
-              else setError("Unable to load QR code.");
-            });
-        } else {
-          alert("Payment completed, but account setup failed.");
-        }
-      });
+    fetch(`${url}/finalizeSignup`, { method: "POST", credentials: "include" })
+      .then(async (res) => {
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.message || "Setup failed");
+
+        const path = data.groupLeader ? "/group/dashboard" : "/user/dashboard";
+        localStorage.setItem("postTOSRedirect", path);
+
+        const r = await fetch(`${url}/get2FA`, { credentials: "include" });
+        const twofa = await r.json();
+        if (!r.ok) throw new Error(twofa.message || "Unable to load 2FA");
+
+        if (twofa.qrCode) setQrCode(twofa.qrCode);
+        if (twofa.secret) setSecret(twofa.secret); 
+      })
+      .catch((e) => setError(e.message || "Unable to initialize"));
   }, []);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(secret);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      setError("Couldn’t copy. Long-press or select the key manually.");
+    }
+  };
 
   const handleVerify = async () => {
     try {
       const code = (token || "").trim();
+      if (code.length !== 6) return setError("Please enter the 6-digit code.");
 
-      if (!code || code.length < 6) {
-        setError("Please enter the 6‑digit code.");
-        return;
-      }
-
-      // Try verifying the token
       const res = await fetch(`${url}/verifyToken`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ token: code }) 
+        body: JSON.stringify({ token: code })
       });
-
       const data = await res.json();
-      console.log(data);
 
-      if (!res.ok) {
-        console.log("point 1",res);
-        setError(data?.message || "2FA verification failed.");
-        return;
-      }
-
-      if (!data.verified) {
-        setError("Invalid token. Please try again.");
-        return;
+      if (!res.ok || !data.verified) {
+        return setError(data?.message || "2FA verification failed.");
       }
 
       setVerified(true);
-
-      // let path = dashboardPath;
-      // if (!path) {
-      //   const roleResponse = await fetch(`${url}/session`, { credentials: "include" });
-      //   const user = await roleResponse.json();
-      //   path = user?.groupLeader ? "/group/dashboard" : "/termsandconditions"; 
-      // }
-
-      // setTimeout(() => navigate(path), 1200);
+      // after verify, stop showing the secret
+      setSecret("");
       setTimeout(() => navigate("/termsandconditions", { replace: true }), 1200);
-    } catch (err) {
-      console.error(err);
+    } catch {
       setError("2FA verification failed. Please try again.");
     }
   };
-
 
   return (
     <div className="container my-5 position-relative py-5">
@@ -107,22 +95,41 @@ const PaymentSuccess = () => {
 
           {qrCode && <img src={qrCode} alt="Scan this QR code" style={{ margin: '20px' }} />}
 
+          {secret && (
+            <div className="mt-3">
+              <p className="mb-1"><strong>Can’t scan?</strong> Enter this setup key:</p>
+              <div
+                className="d-inline-flex align-items-center gap-2 bg-light p-2 rounded"
+                style={{ wordBreak: "break-all", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}
+              >
+                <span className="select-all">{formatSecret(secret)}</span>
+                <button type="button" className="btn btn-sm btn-outline-secondary" onClick={handleCopy}>
+                  {copied ? "Copied!" : "Copy"}
+                </button>
+              </div>
+              <div className="text-muted small mt-2">
+                In your authenticator app, choose “Enter a setup key”. Account name = your email. Issuer = CoDoc Academy.
+              </div>
+            </div>
+          )}
+
           <div className="mt-3">
             <input
-              className="form-control mb-2"
+              className="form-control my-4 d-inline-block text-center"
               placeholder="Enter 6-digit code"
               value={token}
               onChange={(e) => setToken(e.target.value)}
               maxLength={6}
               // inputMode="numeric"
               pattern="\d*"
+              style={{ width: '400px' }}
             />
             <button
               className="btn btn-darkFuschia"
               onClick={handleVerify}
               disabled={(token || "").trim().length !== 6}
-              >
-                Verify</button>
+            >
+              Verify</button>
             {error && <p className="text-danger mt-2">{error}</p>}
             {/* <p className='text-danger mt-3' style={{ overflowWrap: 'break-word' }}>The authentication key may not appear to work, but please log in. Your account has been created successfully. The software is currently being modified</p> */}
           </div>

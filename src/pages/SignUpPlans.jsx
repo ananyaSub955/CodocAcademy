@@ -18,23 +18,23 @@ const SignUpPlans = () => {
 
                     <div className="text-center mb-5">
                         <h2 className="bg-lightBlue rounded p-3 text-center my-2 fs-5 d-inline-block">
-                            Price: $--.--/year
+                            Price: $89.00 / member / month
                         </h2>
 
                         <br/>
                         
-                        <h2 className="bg-lightBlue rounded p-3 text-center my-2 fs-5 d-inline-block">
+                        {/* <h2 className="bg-lightBlue rounded p-3 text-center my-2 fs-5 d-inline-block">
                             Price: $--.--/year
-                        </h2>
+                        </h2> */}
 
-                        <ul className='list-group bg-transparent border-0'>
+                        {/* <ul className='list-group bg-transparent border-0'>
                             <li className='list-group-item bg-transparent border-0 text-white fs-4'>✓ Benefit 1</li>
                             <li className='list-group-item bg-transparent border-0 text-white fs-4'>✓ Benefit 2</li>
                             <li className='list-group-item bg-transparent border-0 text-white fs-4'>✓ Benefit 3</li>
                             <li className='list-group-item bg-transparent border-0 text-white fs-4'>✓ Benefit 4</li>
                             <li className='list-group-item bg-transparent border-0 text-white fs-4'>✓ Benefit 5</li>
 
-                        </ul>
+                        </ul> */}
 
                         <button
                             className="btn btn-darkFuschia fs-4 p-3 mt-2"
@@ -53,23 +53,23 @@ const SignUpPlans = () => {
 
                     <div className="text-center mb-5">
                         <h2 className="bg-lightBlue rounded p-3 text-center my-2 fs-5 d-inline-block">
-                            Price: $--.--/month
+                            Price: $99.00 / month
                         </h2>
                         
                         <br/>
 
-                        <h2 className="bg-lightBlue rounded p-3 text-center my-2 fs-5 d-inline-block">
+                        {/* <h2 className="bg-lightBlue rounded p-3 text-center my-2 fs-5 d-inline-block">
                             Price: $--.--/year
-                        </h2>
+                        </h2> */}
 
-                        <ul className='list-group bg-transparent border-0'>
+                        {/* <ul className='list-group bg-transparent border-0'>
                             <li className='list-group-item bg-transparent border-0 text-white fs-4'>✓ Benefit 1</li>
                             <li className='list-group-item bg-transparent border-0 text-white fs-4'>✓ Benefit 2</li>
                             <li className='list-group-item bg-transparent border-0 text-white fs-4'>✓ Benefit 3</li>
                             <li className='list-group-item bg-transparent border-0 text-white fs-4'>✓ Benefit 4</li>
                             <li className='list-group-item bg-transparent border-0 text-white fs-4'>✓ Benefit 5</li>
 
-                        </ul>
+                        </ul> */}
 
                         <button
                             className="btn btn-darkFuschia fs-4 p-3 mt-2"
