@@ -640,8 +640,8 @@ app.post("/:speciality/info", async (req, res) => {
     }
 
     try {
-        const allowedSpecialties = ["diabetes", "vascular", "cardiology", "renal", "neurology", "connective tissue disorder",
-            "miscellaneous", "gastroentrology", "sud and behaviorial sciences"
+        const allowedSpecialties = ["diabetes", "vascular", "pulmonary", "cardiology", "renal", "neurology", "connective tissue disorder",
+            "miscellaneous", "gastroentrology", "sud and behaviorial sciences", "oncology"
         ];
         if (!allowedSpecialties.includes(speciality.toLowerCase())) {
             return res.status(404).json({ error: "Specialty not found" });

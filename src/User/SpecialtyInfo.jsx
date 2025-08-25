@@ -131,12 +131,41 @@ const SpecialtyInfo = () => {
     return match && item[match] ? item[match] : "—";
   };
 
+  const isFilled = (v) =>
+    v !== null && v !== undefined && String(v).trim() !== "";
+
+  const firstValue = (item, keys = []) => {
+    // handles keys that might use non-breaking spaces, case, etc.
+    const norm = (s) => s.replace(/\u00A0/g, " "); // NBSP → space
+    for (const k of keys) {
+      const v = item?.[k] ?? item?.[norm(k)];
+      if (isFilled(v)) return v;
+    }
+    return undefined;
+  };
+
   const TopicBody = ({ item }) => {
+    const icd10 = firstValue(item, ["ICD 10", "ICD-10"]);
+    const clinicalTip = firstValue(item, ["Clinical tip", "Clinical Tip"]);
+    const codingTip = firstValue(item, ["Coding/Documentation tip", "Coding / Documentation tip"]);
+
+    const hccCategory = firstValue(item, ["HCC Category", "HCC category", "HCC Category"]);
+    const rxHccCategory = firstValue(item, ["RX HCC Category", "Rx HCC Category", "RX HCC Category"]);
+
+    const hccWeight = firstValue(item, ["HCC weight", "HCC Weight"]);
+    const rxHccWeight = firstValue(item, ["RX HCC weight", "RX HCC Weight", "RX HCC weight"]);
+
     return (
       <>
-        <p><strong>ICD-10:</strong> {getFieldValue(item, "ICD 10")}</p>
-        <p><strong>Clinical Tip:</strong> {getFieldValue(item, "Clinical tip")}</p>
-        <p><strong>Coding/Documentation Tip:</strong> {getFieldValue(item, "Coding/Documentation tip")}</p>
+        {isFilled(icd10) && <p><strong>ICD-10:</strong> {icd10}</p>}
+        {isFilled(clinicalTip) && <p><strong>Clinical Tip:</strong> {clinicalTip}</p>}
+        {isFilled(codingTip) && <p><strong>Coding/Documentation Tip:</strong> {codingTip}</p>}
+
+        {isFilled(hccCategory) && <p><strong>HCC Category:</strong> {hccCategory}</p>}
+        {isFilled(rxHccCategory) && <p><strong>RX HCC Category:</strong> {rxHccCategory}</p>}
+
+        {hccWeight !== undefined && <p><strong>HCC Weight:</strong> {hccWeight}</p>}
+        {rxHccWeight !== undefined && <p><strong>RX HCC Weight:</strong> {rxHccWeight}</p>}
       </>
     );
   };
