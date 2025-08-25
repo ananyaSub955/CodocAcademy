@@ -242,15 +242,15 @@ app.post("/individualSignup", async (req, res) => {
         };
 
         //LIVE DEV ==============================
-        const priceId = frequency === "yearly"
-            ? 'price_1RzSVNGFIwTWAvcXxNAZ3TS4' //yearly
-            : 'price_1RzSVNGFIwTWAvcXTEvUsNYN'; //monthly
+        // const priceId = frequency === "yearly"
+        //     ? 'price_1RzSVNGFIwTWAvcXxNAZ3TS4' //yearly
+        //     : 'price_1RzSVNGFIwTWAvcXTEvUsNYN'; //monthly
 
 
         //TESTING ==============================
-        // const priceId = frequency === "yearly"
-        //     ? 'price_1RzOB27zM3Arj80O3ZM1to4D' //yearly
-        //     : 'price_1RzOAZ7zM3Arj80OnZb86LSm'; //monthly
+        const priceId = frequency === "yearly"
+            ? 'price_1RzOB27zM3Arj80O3ZM1to4D' //yearly
+            : 'price_1RzOAZ7zM3Arj80OnZb86LSm'; //monthly
 
 
         const origin = getClientOrigin(req);
@@ -368,17 +368,17 @@ app.post("/createGroup", async (req, res) => {
         }
 
         // TEST price IDs
-        // const priceIds = {
-        //     monthly: "price_1RzOKh7zM3Arj80O9FJtCCIO",
-        //     yearly: "price_1RzOKh7zM3Arj80OxpToW3r8",
-        // };
+        const priceIds = {
+            monthly: "price_1RzOKh7zM3Arj80O9FJtCCIO",
+            yearly: "price_1RzOKh7zM3Arj80OxpToW3r8",
+        };
 
 
         // LIVE price IDs
-        const priceIds = {
-            monthly: "price_1RzSUsGFIwTWAvcXpOS3JHHi",
-            yearly: "price_1RzSUsGFIwTWAvcXgHowoyVR",
-        };
+        // const priceIds = {
+        //     monthly: "price_1RzSUsGFIwTWAvcXpOS3JHHi",
+        //     yearly: "price_1RzSUsGFIwTWAvcXgHowoyVR",
+        // };
         const priceId = priceIds[planFreq];
 
         //const planLabel = `group_${groupSize}_${planFreq}`;
@@ -1068,6 +1068,27 @@ app.get('/search', async (req, res) => {
 });
 
 
+
+// POST /consent
+app.post("/consent", async (req, res) => {
+  try {
+    const { document, version, accepted, acceptedAt, respondedAt } = req.body;
+    const user = req.session?.user;
+    if (!user) return res.status(401).json({ message: "Not authenticated" });
+
+    await database.collection("consents").insertOne({
+      userId: user.id || user._id,   // whichever you use
+      email: user.email,
+      document,
+      version,
+      accepted: !!accepted,
+      timestamp: acceptedAt || respondedAt || new Date().toISOString()
+    });
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ message: "Failed to record consent" });
+  }
+});
 
 
 app.get('/health', (_req, res) => res.send("ok"));

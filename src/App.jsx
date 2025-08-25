@@ -28,6 +28,7 @@ import SuperAdminDashboard from './SuperAdmin/SuperAdminDashboard.jsx';
 import GroupMembers from './SuperAdmin/components/GroupMembers.jsx';
 import ContactUs from './pages/ContactUs.jsx';
 import ContinueDashboard from './pages/ContinueDashboard.jsx';
+import TermsAndConditions from './pages/TermsAndConditions.jsx';
 
 const App = () => {
   const router = createBrowserRouter(
@@ -48,6 +49,7 @@ const App = () => {
           <Route path='cancel' element={<Cancel />} />
           <Route path ='contact' element={<ContactUs/>} />
           <Route path ='continueDashboard' element={<ContinueDashboard/>} />
+          <Route path ='termsandconditions' element={<TermsAndConditions/>} />
           
           < Route path='*' element={<NotFound />} />
         </Route>

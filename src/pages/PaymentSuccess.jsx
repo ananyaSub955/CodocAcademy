@@ -70,15 +70,15 @@ const PaymentSuccess = () => {
 
       setVerified(true);
 
-      // Prefer the path computed from finalizeSignup; if missing, fetch session to decide
-      let path = dashboardPath;
-      if (!path) {
-        const roleResponse = await fetch(`${url}/session`, { credentials: "include" });
-        const user = await roleResponse.json();
-        path = user?.groupLeader ? "/group/dashboard" : "/user/dashboard";
-      }
+      // let path = dashboardPath;
+      // if (!path) {
+      //   const roleResponse = await fetch(`${url}/session`, { credentials: "include" });
+      //   const user = await roleResponse.json();
+      //   path = user?.groupLeader ? "/group/dashboard" : "/termsandconditions"; 
+      // }
 
-      setTimeout(() => navigate(path), 1200);
+      // setTimeout(() => navigate(path), 1200);
+      setTimeout(() => navigate("/termsandconditions", { replace: true }), 1200);
     } catch (err) {
       console.error(err);
       setError("2FA verification failed. Please try again.");
@@ -96,7 +96,7 @@ const PaymentSuccess = () => {
       {verified ? (
         <div className="text-center mt-5">
           <h1>✅ 2FA Verified</h1>
-          <p>Redirecting you to your dashboard...</p>
+          <p>Redirecting you to our terms and conditions...</p>
         </div>
       ) : (
         <div className="text-center mt-5">
@@ -113,14 +113,14 @@ const PaymentSuccess = () => {
               placeholder="Enter 6-digit code"
               value={token}
               onChange={(e) => setToken(e.target.value)}
-              maxLength={7}
+              maxLength={6}
               // inputMode="numeric"
               pattern="\d*"
             />
             <button
               className="btn btn-darkFuschia"
               onClick={handleVerify}
-              // disabled={(token || "").trim().length !>= 6}
+              disabled={(token || "").trim().length !== 6}
               >
                 Verify</button>
             {error && <p className="text-danger mt-2">{error}</p>}
