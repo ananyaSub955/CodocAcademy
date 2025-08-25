@@ -545,27 +545,58 @@ app.post("/finalizeSignup", async (req, res) => {
 
 });
 
-app.get('/get2FA', async (req, res) => {
-    if (!req.session.userId) return res.status(401).json({ message: "Unauthorized" });
 
-    const user = await userCollection.findOne({ _id: new ObjectId(req.session.userId) });
-    if (!user || !user.twoFA?.enabled) return res.status(400).json({ message: "2FA not set up" });
+app.get("/get2FA", async (req, res) => {
+  try {
+    const userId = req.session?.userId;
+    const sessionUser = req.session?.user;
 
-    const secret = user.twoFA.secret;
+    let user;
+    if (userId) {
+      user = await userCollection.findOne(
+        { _id: new ObjectId(userId) },
+        { projection: { email: 1, twoFA: 1 } }
+      );
+    } else if (sessionUser?.email) {
+      user = await userCollection.findOne(
+        { email: sessionUser.email },
+        { projection: { email: 1, twoFA: 1 } }
+      );
+    } else {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
 
-    const otpauthUrl = `otpauth://totp/CodocAcademy:${user.email}?secret=${secret}&issuer=CodocAcademy`;
+    const tfa = user?.twoFA || {};
+    // Prefer saved otpauth_url; otherwise build one from base32/secret
+    let otpauthUrl = tfa.otpauth_url;
+    const rawSecret = tfa.base32 || tfa.secret; // support either key name
 
-    QRCode.toDataURL(otpauthUrl, (err, qrCodeDataUrl) => {
-        if (err) {
-            return res.status(500).json({ message: "Failed to generate QR code" });
-        }
+    if (!otpauthUrl && rawSecret) {
+      const issuer = "CoDoc Academy";
+      const label = encodeURIComponent(`${issuer}:${user.email}`);
+      const encIssuer = encodeURIComponent(issuer);
+      const encSecret = encodeURIComponent(String(rawSecret).replace(/\s+/g, "").toUpperCase());
+      otpauthUrl =
+        `otpauth://totp/${label}?secret=${encSecret}` +
+        `&issuer=${encIssuer}&digits=6&period=30&algorithm=SHA1`;
+    }
 
-        res.json({
-            qrCode: qrCodeDataUrl,
-            secret,
-        });
-    });
+    if (!otpauthUrl) {
+      return res.status(400).json({ message: "2FA not initialized" });
+    }
+
+    const qrCode = await QRCode.toDataURL(otpauthUrl);
+    // Only expose setup key before verification
+    const secret = tfa.verified ? undefined : rawSecret;
+
+    res.json({ qrCode, secret });
+  } catch (e) {
+    console.error("get2FA error:", e);
+    res.status(500).json({ message: "Failed to load 2FA setup", error: e.message });
+  }
 });
+
+
 
 app.post('/verifyToken', async (req, res) => {
     try {
